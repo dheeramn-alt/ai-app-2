@@ -1,0 +1,8 @@
+{
+  "name": "FigDoc AI",
+  "description": "An intelligent documentation bridge that transforms Figma designs into detailed User Stories and technical specifications using Gemini AI.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
