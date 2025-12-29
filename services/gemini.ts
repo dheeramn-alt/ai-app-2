@@ -1,14 +1,19 @@
-"use server";
-
 import { GoogleGenAI, SchemaType } from "@google/genai";
 import { Story, Project } from "../types";
 
 /**
  * Expert Documentation Engine Powered by Google Gemini.
- * We initialize the AI client using process.env.API_KEY injected from the environment.
- * "use server" at the top ensures this runs on the server, accessing the private key safely.
+ * * NOTE: In Vite (Client-side), we must use import.meta.env.VITE_API_KEY.
+ * WARNING: This exposes your API key to the browser. Ensure your Google Cloud Console
+ * restrictions (HTTP Referrer) are set to your domain to prevent misuse.
  */
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAiClient = () => {
+  const apiKey = import.meta.env.VITE_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing VITE_API_KEY. Please set it in Vercel Environment Variables.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 export interface GeneratedStory {
   description: string;
