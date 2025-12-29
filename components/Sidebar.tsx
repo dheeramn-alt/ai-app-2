@@ -94,6 +94,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setDropTargetEpicId(null);
   };
 
+  const confirmDeleteEpic = (e: React.MouseEvent, epic: Epic) => {
+    e.stopPropagation();
+    const message = `Are you sure you want to delete the epic "${epic.title}"? This will permanently remove all ${epic.stories.length} stories inside it.`;
+    if (window.confirm(message)) {
+      onDeleteEpic(epic.id);
+    }
+  };
+
+  const confirmDeleteStory = (e: React.MouseEvent, story: Story) => {
+    e.stopPropagation();
+    const message = `Are you sure you want to delete the story "${story.title}"? This action cannot be undone.`;
+    if (window.confirm(message)) {
+      onDeleteStory(story.id);
+    }
+  };
+
   return (
     <div className="w-72 flex-shrink-0 flex flex-col border-r border-slate-100 bg-white dark:bg-slate-950 dark:border-slate-900 h-full overflow-hidden transition-colors duration-300">
       <div className="p-4 border-b border-slate-50 dark:border-slate-900 flex items-center justify-between">
@@ -168,6 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button 
                   onClick={(e) => startRenaming(e, epic)}
                   className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-400 shadow-sm transition-all"
+                  title="Rename Epic"
                 >
                   <Icons.Edit className="w-3 h-3" />
                 </button>
@@ -177,8 +194,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onAddStory(epic.id);
                   }}
                   className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-400 shadow-sm transition-all"
+                  title="Add Story"
                 >
                   <Icons.Plus className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={(e) => confirmDeleteEpic(e, epic)}
+                  className="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md text-slate-300 hover:text-rose-500 shadow-sm transition-all"
+                  title="Delete Epic"
+                >
+                  <Icons.Trash className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -202,6 +227,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <Icons.FileText className={`mr-1 w-3.5 h-3.5 flex-shrink-0 ${activeStoryId === story.id ? 'text-primary-500' : 'text-slate-300'}`} />
                       <span className="truncate">{story.title}</span>
                     </div>
+                    <button 
+                      onClick={(e) => confirmDeleteStory(e, story)}
+                      className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm"
+                      title="Delete Story"
+                    >
+                      <Icons.Trash className="w-3 h-3" />
+                    </button>
                   </div>
                 ))}
                 {epic.stories.length === 0 && (

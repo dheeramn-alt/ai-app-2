@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { AppState, Epic, Story, UserRole, User, Project, StoryRelationship } from './types';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { AppState, Epic, Story, UserRole, User, Project, StoryRelationship, Template } from './types';
 import { INITIAL_PROJECTS, INITIAL_TEMPLATES, Icons } from './constants';
 import { Sidebar } from './components/Sidebar';
 import { Editor } from './components/Editor';
@@ -25,6 +25,18 @@ const ProjectWorkspace = ({
   const { projectId } = useParams();
   const project = state.projects.find(p => p.id === projectId);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
+  const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
+  const templateDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (templateDropdownRef.current && !templateDropdownRef.current.contains(event.target as Node)) {
+        setIsTemplateDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!project) return <div>Project not found</div>;
 
@@ -78,7 +90,8 @@ const ProjectWorkspace = ({
       sadPath: template.structure.defaultSadPath || '',
       status: 'Draft',
       versions: [],
-      relationships: []
+      relationships: [],
+      activeUserIds: []
     };
     const updatedEpics = project.epics.map(e => 
       e.id === epicId ? { ...e, stories: [...e.stories, newStory], isOpen: true } : e
@@ -104,9 +117,6 @@ const ProjectWorkspace = ({
   };
 
   const handleDeleteEpic = (epicId: string) => {
-    const confirmation = window.confirm("Are you sure you want to delete this Epic? All stories within this epic will be permanently removed.");
-    if (!confirmation) return;
-    
     const epicToDelete = project.epics.find(e => e.id === epicId);
     if (activeStoryId && epicToDelete?.stories.some(s => s.id === activeStoryId)) {
       setActiveStoryId(null);
@@ -117,9 +127,6 @@ const ProjectWorkspace = ({
   };
 
   const handleDeleteStory = (storyId: string) => {
-    const confirmation = window.confirm("Are you sure you want to delete this user story? This action cannot be undone.");
-    if (!confirmation) return;
-    
     if (activeStoryId === storyId) {
       setActiveStoryId(null);
     }
@@ -138,6 +145,8 @@ const ProjectWorkspace = ({
     );
     onUpdateProject({ ...project, epics: updatedEpics, lastModified: Date.now() });
   };
+
+  const selectedTemplate = state.templates.find(t => t.id === project.defaultTemplateId) || state.templates[0];
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden transition-colors duration-300">
@@ -162,18 +171,44 @@ const ProjectWorkspace = ({
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700">
-             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template</span>
-             <select 
-               value={project.defaultTemplateId}
-               onChange={(e) => onUpdateProject({ ...project, defaultTemplateId: e.target.value, lastModified: Date.now() })}
-               className="text-xs font-bold bg-transparent border-none outline-none focus:ring-0 text-primary-600 cursor-pointer"
-             >
-               {state.templates.map(t => (
-                 <option key={t.id} value={t.id}>{t.name}</option>
-               ))}
-             </select>
+          {/* CUSTOM TEMPLATE SELECTOR DROPDOWN */}
+          <div className="relative" ref={templateDropdownRef}>
+            <button 
+              onClick={() => setIsTemplateDropdownOpen(!isTemplateDropdownOpen)}
+              className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-primary-500/30 transition-all shadow-sm active:scale-95"
+            >
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-primary-600 truncate max-w-[120px]">{selectedTemplate.name}</span>
+                <Icons.ChevronDown className={`w-3.5 h-3.5 text-primary-500 transition-transform duration-300 ${isTemplateDropdownOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+
+            {isTemplateDropdownOpen && (
+              <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2 z-[60] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+                <div className="px-4 py-2 border-b border-slate-50 dark:border-slate-800 mb-1">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select Narrative Schema</span>
+                </div>
+                {state.templates.map(t => (
+                  <button 
+                    key={t.id}
+                    onClick={() => {
+                      onUpdateProject({ ...project, defaultTemplateId: t.id, lastModified: Date.now() });
+                      setIsTemplateDropdownOpen(false);
+                    }}
+                    className={`
+                      w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold transition-colors
+                      ${project.defaultTemplateId === t.id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}
+                    `}
+                  >
+                    <span>{t.name}</span>
+                    {project.defaultTemplateId === t.id && <Icons.Check className="w-3.5 h-3.5" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
           <button className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-primary-500 transition-colors">
             <Icons.Plus className="w-5 h-5" />
           </button>
@@ -202,6 +237,8 @@ const ProjectWorkspace = ({
             epics={project.epics}
             templates={state.templates}
             selectedTemplateId={project.defaultTemplateId}
+            currentUser={state.currentUser}
+            users={state.users}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:bg-slate-950 transition-colors">

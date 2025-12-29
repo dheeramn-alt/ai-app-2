@@ -32,6 +32,23 @@ export interface StoryRelationship {
   type: RelationshipType;
 }
 
+// Added the missing Template interface to satisfy imports in other components
+export interface Template {
+  id: string;
+  name: string;
+  description: string;
+  structure: {
+    hasDescription: boolean;
+    hasAcceptanceCriteria: boolean;
+    hasHappyPath: boolean;
+    hasSadPath: boolean;
+    defaultNarrative?: string;
+    defaultAC?: string[];
+    defaultHappyPath?: string;
+    defaultSadPath?: string;
+  };
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -64,22 +81,7 @@ export interface Story {
   figmaScreenshot?: string;
   versions?: StoryVersion[];
   relationships?: StoryRelationship[];
-}
-
-export interface Template {
-  id: string;
-  name: string;
-  description: string;
-  structure: {
-    hasDescription: boolean;
-    hasAcceptanceCriteria: boolean;
-    hasHappyPath: boolean;
-    hasSadPath: boolean;
-    defaultNarrative?: string;
-    defaultAC?: string[];
-    defaultHappyPath?: string;
-    defaultSadPath?: string;
-  };
+  activeUserIds?: string[];
 }
 
 export interface AppState {

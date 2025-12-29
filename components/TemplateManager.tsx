@@ -118,7 +118,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
 
             <div className="flex flex-wrap gap-2.5 mb-6">
               {Object.entries(template.structure).map(([key, value]) => (
-                value && (
+                value && typeof value === 'boolean' && (
                   <span key={key} className="text-[9px] px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full font-black uppercase tracking-widest border border-slate-200/50 dark:border-slate-700/50">
                     {key.replace('has', '')}
                   </span>
@@ -140,8 +140,9 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
 
       {editingTemplate && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[44px] shadow-3xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-500">
-            <div className="p-10 space-y-8">
+          <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-[44px] shadow-3xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-500 flex h-[80vh]">
+            {/* Configuration Sidebar */}
+            <div className="w-1/2 p-10 space-y-8 overflow-y-auto border-r border-slate-100 dark:border-slate-800 no-scrollbar">
               <h3 className="text-2xl font-black dark:text-white tracking-tighter">Preset Config</h3>
               
               <div className="space-y-6">
@@ -203,6 +204,84 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                 >
                   Save Preset
                 </button>
+              </div>
+            </div>
+
+            {/* Live Preview Area */}
+            <div className="w-1/2 bg-slate-50 dark:bg-slate-950/50 p-10 overflow-y-auto no-scrollbar relative">
+              <div className="absolute top-6 left-6 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Live Workspace Preview</span>
+              </div>
+
+              <div className="mt-12 bg-white dark:bg-slate-900 rounded-[32px] p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="space-y-2">
+                  <div className="w-24 h-1 rounded-full bg-primary-500/20"></div>
+                  <h4 className="text-xl font-black tracking-tight dark:text-white truncate">Sample Document Instance</h4>
+                </div>
+
+                {editingTemplate.structure.hasDescription && (
+                  <div className="space-y-3">
+                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Narrative</label>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-lg w-full"></div>
+                      <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-lg w-5/6"></div>
+                      <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-lg w-4/6 opacity-50"></div>
+                    </div>
+                  </div>
+                )}
+
+                {editingTemplate.structure.hasAcceptanceCriteria && (
+                  <div className="space-y-4">
+                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Acceptance Criteria</label>
+                    <div className="space-y-2">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="flex items-center gap-3">
+                          <div className="w-4 h-4 rounded bg-primary-100 dark:bg-primary-900/40 flex-shrink-0"></div>
+                          <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full w-full"></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-6">
+                  {editingTemplate.structure.hasHappyPath && (
+                    <div className="space-y-3">
+                      <label className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-1.5">
+                        <div className="w-1 h-1 rounded-full bg-emerald-500"></div> Happy Path
+                      </label>
+                      <div className="h-20 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800"></div>
+                    </div>
+                  )}
+                  {editingTemplate.structure.hasSadPath && (
+                    <div className="space-y-3">
+                      <label className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-1.5">
+                        <div className="w-1 h-1 rounded-full bg-rose-500"></div> Edge Logic
+                      </label>
+                      <div className="h-20 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800"></div>
+                    </div>
+                  )}
+                </div>
+                
+                {!editingTemplate.structure.hasDescription && 
+                 !editingTemplate.structure.hasAcceptanceCriteria && 
+                 !editingTemplate.structure.hasHappyPath && 
+                 !editingTemplate.structure.hasSadPath && (
+                   <div className="py-20 flex flex-col items-center justify-center text-center opacity-30">
+                     <Icons.FileText className="w-12 h-12 mb-4" />
+                     <p className="text-[10px] font-black uppercase tracking-widest">Enable blocks to preview</p>
+                   </div>
+                 )}
+              </div>
+
+              {/* Tips */}
+              <div className="mt-8 px-8 flex gap-4">
+                <div className="p-4 bg-primary-50 dark:bg-primary-950/30 rounded-2xl border border-primary-100 dark:border-primary-900/50 flex-1">
+                  <p className="text-[10px] leading-relaxed text-primary-700 dark:text-primary-300">
+                    <strong>Pro-tip:</strong> Use focused templates for bug reports and complex narratives for architectural blueprints.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
