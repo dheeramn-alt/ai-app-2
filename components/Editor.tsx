@@ -16,13 +16,17 @@ interface EditorProps {
   currentUser: User;
   users: User[];
   figmaConfig?: { apiKey: string; connected: boolean };
+  globalFontSize: number;
+  onUpdateGlobalFontSize: (size: number) => void;
 }
 
 export const Editor: React.FC<EditorProps> = ({ 
   story, 
   onUpdate, 
   onDelete,
-  currentUser
+  currentUser,
+  globalFontSize,
+  onUpdateGlobalFontSize
 }) => {
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -32,6 +36,7 @@ export const Editor: React.FC<EditorProps> = ({
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const narrativeRef = useRef<HTMLTextAreaElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,7 +51,6 @@ export const Editor: React.FC<EditorProps> = ({
 
   /**
    * Precise Figma URL detection logic.
-   * Detects design files, boards, and specific frame/node IDs.
    */
   const figmaAnalysis = useMemo(() => {
     if (!chatInput) return null;
@@ -54,7 +58,6 @@ export const Editor: React.FC<EditorProps> = ({
     const urls = chatInput.match(urlRegex);
     if (!urls) return null;
     
-    // Figma standard URL pattern for files and specific nodes
     const figmaRegex = /https?:\/\/(?:www\.)?figma\.com\/(file|design|proto|board)\/([a-zA-Z0-9]+)(?:\/[^?#]*)?(?:\?(?:.*&)?node-id=([^&?#]+))?/;
     
     for (const url of urls) {
@@ -145,7 +148,6 @@ export const Editor: React.FC<EditorProps> = ({
     if (!figmaAnalysis || !figmaAnalysis.isValid || isChatLoading) return;
     setIsChatLoading(true);
     try {
-      // Simulation of Figma API metadata parsing
       const mockFigmaMetaData = {
         name: figmaAnalysis.isFrame ? `Frame ${figmaAnalysis.nodeId}` : "Entire Document",
         type: figmaAnalysis.isFrame ? "FRAME" : "DOCUMENT",
@@ -166,6 +168,15 @@ export const Editor: React.FC<EditorProps> = ({
     }
   };
 
+  // Adjust narrative height automatically
+  useEffect(() => {
+    if (narrativeRef.current) {
+      narrativeRef.current.style.height = 'auto';
+      narrativeRef.current.style.height = `${narrativeRef.current.scrollHeight}px`;
+    }
+  }, [displayedStory.description, globalFontSize]);
+
+  // Adjust chat input height
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -173,9 +184,11 @@ export const Editor: React.FC<EditorProps> = ({
     }
   }, [chatInput]);
 
+  const fontSizeOptions = [16, 24, 32, 48, 64];
+
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-[#020617] overflow-hidden text-slate-800 dark:text-slate-100 relative transition-colors duration-300">
-      {/* Top Header - Screenshot Fidelity */}
+      {/* Top Header */}
       <div className="h-14 flex items-center justify-between px-8 border-b border-slate-100 dark:border-slate-900 bg-white/95 dark:bg-[#020617]/95 backdrop-blur-xl z-30">
         <div className="flex items-center gap-5 flex-1">
           <div className="bg-slate-50 dark:bg-[#0b101f] text-[11px] font-black text-slate-400 dark:text-slate-600 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-slate-800 uppercase tracking-widest shrink-0 shadow-sm">
@@ -218,7 +231,7 @@ export const Editor: React.FC<EditorProps> = ({
       <div className="flex-1 overflow-y-auto px-6 md:px-24 py-10 md:py-20 no-scrollbar scroll-smooth">
         <div className="max-w-5xl mx-auto space-y-16 pb-64">
           
-          {/* Metadata Block - Screenshot Fidelity */}
+          {/* Metadata Block */}
           <div className="p-8 md:p-12 rounded-[40px] border border-blue-500/10 bg-blue-50/40 dark:bg-blue-500/[0.02] grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 shadow-sm">
             <div className="space-y-4">
               <label className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-700">Design Reference</label>
@@ -247,13 +260,32 @@ export const Editor: React.FC<EditorProps> = ({
 
           {/* User Narrative */}
           <section className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
-            <label className="text-[11px] font-black uppercase tracking-[0.5em] text-slate-300 dark:text-slate-800">User Narrative</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-black uppercase tracking-[0.5em] text-slate-300 dark:text-slate-800">User Narrative</label>
+              
+              {/* Text Size Adjustment Tool */}
+              <div className="flex items-center gap-2 p-1 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                {fontSizeOptions.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => onUpdateGlobalFontSize(size)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${globalFontSize === size ? 'bg-white dark:bg-slate-800 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-300 dark:text-slate-700 hover:text-slate-500'}`}
+                  >
+                    <span style={{ fontSize: '10px' }} className="font-black">A</span>
+                    <span style={{ fontSize: '14px' }} className="font-black">A</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             <div className="relative group">
               <textarea 
+                ref={narrativeRef}
                 readOnly={!!previewVersionId}
                 value={displayedStory.description}
+                style={{ fontSize: `${globalFontSize}px` }}
                 onChange={(e) => handleFieldChange('description', e.target.value)}
-                className="w-full bg-transparent border-none outline-none focus:ring-0 text-3xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-slate-100 min-h-[220px] resize-none leading-[1.1] placeholder:text-slate-50 dark:placeholder:text-slate-900 transition-colors"
+                className="w-full bg-transparent border-none outline-none focus:ring-0 font-black tracking-tighter text-slate-900 dark:text-slate-100 min-h-[220px] resize-none leading-[1.1] placeholder:text-slate-50 dark:placeholder:text-slate-900 transition-all duration-300"
                 placeholder="### 🎯 Objective"
               />
             </div>
@@ -296,7 +328,7 @@ export const Editor: React.FC<EditorProps> = ({
         </div>
       </div>
 
-      {/* Synthesis Bar - Mobile Responsive & Functional Chip Detection */}
+      {/* Synthesis Bar */}
       {!previewVersionId && (
         <div className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 w-full max-w-3xl px-6 md:px-12 pointer-events-none z-50">
           <div className="flex flex-col items-center gap-4 md:gap-5">

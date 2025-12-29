@@ -32,7 +32,6 @@ export interface StoryRelationship {
   type: RelationshipType;
 }
 
-// Added the missing Template interface to satisfy imports in other components
 export interface Template {
   id: string;
   name: string;
@@ -82,6 +81,7 @@ export interface Story {
   versions?: StoryVersion[];
   relationships?: StoryRelationship[];
   activeUserIds?: string[];
+  fontSize?: number; // Added to store text size preference for the narrative
 }
 
 export interface AppState {
@@ -95,4 +95,5 @@ export interface AppState {
   currentUser: User;
   users: User[];
   isDarkMode: boolean;
+  globalEditorFontSize: number; // Global UI preference for narrative text size
 }

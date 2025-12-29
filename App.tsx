@@ -280,6 +280,8 @@ const ProjectWorkspace = ({
             currentUser={state.currentUser}
             users={state.users}
             figmaConfig={state.figmaConfig}
+            globalFontSize={state.globalEditorFontSize}
+            onUpdateGlobalFontSize={(size) => onUpdateState({ globalEditorFontSize: size })}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 text-center p-8 transition-colors duration-300">
@@ -306,7 +308,8 @@ const AppContent = () => {
       figmaConfig: { apiKey: '', connected: false },
       currentUser: DEFAULT_USER,
       users: [DEFAULT_USER],
-      isDarkMode: true 
+      isDarkMode: true,
+      globalEditorFontSize: 48 // Default large size as per screenshot
     };
   });
 
