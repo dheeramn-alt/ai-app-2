@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Template } from '../types';
-import { Icons } from '../constants';
+import { Template } from '../types.ts';
+import { Icons } from '../constants.tsx';
 
 interface TemplateManagerProps {
   templates: Template[];
@@ -141,7 +141,6 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
       {editingTemplate && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-300">
           <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-[44px] shadow-3xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-500 flex h-[80vh]">
-            {/* Configuration Sidebar */}
             <div className="w-1/2 p-10 space-y-8 overflow-y-auto border-r border-slate-100 dark:border-slate-800 no-scrollbar">
               <h3 className="text-2xl font-black dark:text-white tracking-tighter">Preset Config</h3>
               
@@ -207,7 +206,6 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
               </div>
             </div>
 
-            {/* Live Preview Area */}
             <div className="w-1/2 bg-slate-50 dark:bg-slate-950/50 p-10 overflow-y-auto no-scrollbar relative">
               <div className="absolute top-6 left-6 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
@@ -275,7 +273,6 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                  )}
               </div>
 
-              {/* Tips */}
               <div className="mt-8 px-8 flex gap-4">
                 <div className="p-4 bg-primary-50 dark:bg-primary-950/30 rounded-2xl border border-primary-100 dark:border-primary-900/50 flex-1">
                   <p className="text-[10px] leading-relaxed text-primary-700 dark:text-primary-300">

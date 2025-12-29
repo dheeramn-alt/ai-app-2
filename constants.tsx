@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Epic, UserRole, Template, Project } from './types';
+import { Epic, UserRole, Template, Project } from './types.ts';
 
 export const INITIAL_EPICS: Epic[] = [
   {

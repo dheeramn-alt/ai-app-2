@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { AppState, UserRole, Template } from '../types';
-import { Icons } from '../constants';
-import { TemplateManager } from './TemplateManager';
+import { AppState, UserRole, Template } from '../types.ts';
+import { Icons } from '../constants.tsx';
+import { TemplateManager } from './TemplateManager.tsx';
 
 interface SettingsProps {
   state: AppState;
@@ -22,7 +22,6 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
           </div>
         </header>
 
-        {/* Local Navigation Tabs */}
         <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit">
           <button 
             onClick={() => setActiveSubTab('integrations')}
@@ -46,7 +45,6 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
 
         {activeSubTab === 'integrations' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            {/* Integration Card */}
             <section className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
               <div className="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center gap-6">
                 <div className="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
@@ -79,7 +77,6 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
               </div>
             </section>
 
-            {/* General Prefs */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>

@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Story, Template, StoryVersion, Epic, StoryRelationship, RelationshipType, User } from '../types';
-import { Icons } from '../constants';
-import { analyzeFigmaDesign, generateStoryFromFigmaData } from '../services/gemini';
+import { Story, Template, StoryVersion, Epic, StoryRelationship, RelationshipType, User } from '../types.ts';
+import { Icons } from '../constants.tsx';
+import { analyzeFigmaDesign, generateStoryFromFigmaData } from '../services/gemini.ts';
 import { GoogleGenAI, Type } from "@google/genai";
 
 interface EditorProps {
@@ -250,7 +250,6 @@ export const Editor: React.FC<EditorProps> = ({
 
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 overflow-hidden text-slate-900 dark:text-slate-100 transition-colors duration-300 relative">
-      {/* Dynamic Workspace Header */}
       <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-30">
         <div className="flex items-center gap-4 flex-1">
           <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-black text-slate-400 tracking-tighter shrink-0 uppercase">{story.id}</span>
@@ -283,7 +282,6 @@ export const Editor: React.FC<EditorProps> = ({
 
           <div className="h-6 w-px bg-slate-100 dark:bg-slate-800"></div>
 
-          {/* Collaborative Presence */}
           <div className="flex items-center gap-3">
              <div className="flex -space-x-2">
                {activeUsers.map(user => (
@@ -312,7 +310,6 @@ export const Editor: React.FC<EditorProps> = ({
 
           <div className="h-6 w-px bg-slate-100 dark:bg-slate-800"></div>
 
-          {/* MODERN CUSTOM STATUS DROPDOWN */}
           <div className="relative" ref={statusRef}>
             <button
               disabled={!!previewVersionId}
@@ -357,16 +354,12 @@ export const Editor: React.FC<EditorProps> = ({
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Specification Content Canvas */}
         <div 
           ref={scrollContainerRef}
           className="flex-1 overflow-y-auto px-6 md:px-12 py-12 no-scrollbar scroll-smooth"
         >
           <div className="max-w-3xl mx-auto space-y-16 pb-80">
-            
-            {/* Metadata & Figma Context */}
             <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 space-y-3">
@@ -374,7 +367,7 @@ export const Editor: React.FC<EditorProps> = ({
                   <div className={`flex items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all ${previewVersionId ? 'opacity-70' : ''}`}>
                     <Icons.Figma />
                     <input 
-                      type="text"
+                      type="text" 
                       readOnly={!!previewVersionId}
                       value={displayedStory.figmaUrl || ''}
                       onChange={(e) => handleFieldChange('figmaUrl', e.target.value)}
@@ -398,7 +391,6 @@ export const Editor: React.FC<EditorProps> = ({
               </div>
             </section>
 
-            {/* Core Narrative */}
             <section className="space-y-6">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">User Narrative</label>
               <textarea 
@@ -410,7 +402,6 @@ export const Editor: React.FC<EditorProps> = ({
               />
             </section>
 
-            {/* Detailed Criteria */}
             <section className="space-y-10">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Acceptance Criteria</label>
@@ -434,7 +425,6 @@ export const Editor: React.FC<EditorProps> = ({
               </div>
             </section>
 
-            {/* Logic & Error Flows */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-6">
               <div className="space-y-5">
                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
@@ -464,7 +454,6 @@ export const Editor: React.FC<EditorProps> = ({
           </div>
         </div>
 
-        {/* VERSION HISTORY SIDEBAR */}
         <div className={`
           absolute top-0 right-0 h-full w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-l border-slate-100 dark:border-slate-800 z-40 transition-transform duration-500 ease-in-out transform
           ${showHistory ? 'translate-x-0' : 'translate-x-full'}
@@ -479,7 +468,6 @@ export const Editor: React.FC<EditorProps> = ({
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
-            {/* Current State Indicator */}
             <div 
               onClick={() => setPreviewVersionId(null)}
               className={`p-4 rounded-2xl border transition-all cursor-pointer ${!previewVersionId ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800' : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'}`}
@@ -545,10 +533,7 @@ export const Editor: React.FC<EditorProps> = ({
         </div>
       </div>
 
-      {/* SMART INPUT BAR: Refined Animations & High-End Visual Feedback */}
       <div className={`absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center pointer-events-none z-50 transition-all duration-500 ${previewVersionId ? 'opacity-30 scale-95 blur-sm grayscale pointer-events-none' : ''}`}>
-        
-        {/* Token Window Visualization - Smooth fade and slide */}
         <div className={`
           mb-4 px-4 py-1.5 bg-slate-950/80 backdrop-blur-2xl border border-slate-800 rounded-full flex items-center gap-3 
           transition-all duration-500 ease-out transform
@@ -579,8 +564,6 @@ export const Editor: React.FC<EditorProps> = ({
           ${isChatLoading ? 'ring-2 ring-primary-500/60' : ''}
           overflow-hidden
         `}>
-          
-          {/* Dynamic Action Bar (FIGMA URL DETECTION CHIP) */}
           <div className={`
             border-b border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between px-5
             transition-all duration-500 ease-in-out
@@ -661,7 +644,6 @@ export const Editor: React.FC<EditorProps> = ({
         </div>
       </div>
 
-      {/* Global AI Status Footer */}
       <div className="h-10 border-t border-slate-100 dark:border-slate-800 px-6 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 bg-white dark:bg-slate-950 z-20">
         <div className="flex items-center gap-8">
           <span className="flex items-center gap-2.5">

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Epic, Story } from '../types';
-import { Icons } from '../constants';
+import { Epic, Story } from '../types.ts';
+import { Icons } from '../constants.tsx';
 import { Link } from 'react-router-dom';
 
 interface SidebarProps {

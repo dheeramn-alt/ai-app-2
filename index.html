@@ -64,6 +64,15 @@
             color: #f8fafc;
         }
     </style>
+    <script>
+        // Shim for process.env to prevent ReferenceErrors in browser
+        window.process = {
+            env: {
+                NODE_ENV: 'production',
+                API_KEY: '' // This will be handled by the environment or middleware
+            }
+        };
+    </script>
 <script type="importmap">
 {
   "imports": {
@@ -78,5 +87,7 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden">
     <div id="root"></div>
+    <!-- Explicitly load the application entry point -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { AppState, Epic, Story, UserRole, User, Project, StoryRelationship, Template } from './types';
-import { INITIAL_PROJECTS, INITIAL_TEMPLATES, Icons } from './constants';
-import { Sidebar } from './components/Sidebar';
-import { Editor } from './components/Editor';
-import { Settings } from './components/Settings';
-import { ProjectDashboard } from './components/ProjectDashboard';
+import { AppState, Epic, Story, UserRole, User, Project, StoryRelationship, Template } from './types.ts';
+import { INITIAL_PROJECTS, INITIAL_TEMPLATES, Icons } from './constants.tsx';
+import { Sidebar } from './components/Sidebar.tsx';
+import { Editor } from './components/Editor.tsx';
+import { Settings } from './components/Settings.tsx';
+import { ProjectDashboard } from './components/ProjectDashboard.tsx';
 import { HashRouter, Routes, Route, Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 
 const DEFAULT_USER: User = {
@@ -171,7 +171,6 @@ const ProjectWorkspace = ({
         </div>
 
         <div className="flex items-center gap-4">
-          {/* CUSTOM TEMPLATE SELECTOR DROPDOWN */}
           <div className="relative" ref={templateDropdownRef}>
             <button 
               onClick={() => setIsTemplateDropdownOpen(!isTemplateDropdownOpen)}

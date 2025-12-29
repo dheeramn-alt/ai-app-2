@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Project, Template } from '../types';
-import { Icons } from '../constants';
+import { Project, Template } from '../types.ts';
+import { Icons } from '../constants.tsx';
 import { useNavigate } from 'react-router-dom';
-import { summarizeProject } from '../services/gemini';
+import { summarizeProject } from '../services/gemini.ts';
 
 interface ProjectDashboardProps {
   projects: Project[];
@@ -148,7 +148,6 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </div>
       </div>
 
-      {/* Project Creation Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-300">
           <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[44px] shadow-3xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-500">
