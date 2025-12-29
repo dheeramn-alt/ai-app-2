@@ -1,24 +1,13 @@
-// Add this line at the very top
-"use server"; 
+"use server";
 
-import { GoogleGenAI, Type } from "@google/genai";
-import { Story, Project } from "../types.ts";
-
-/**
- * Now this runs on the server, so process.env.API_KEY will be defined
- * and your key remains private.
- */
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-// ... rest of your code
-import { GoogleGenAI, Type } from "@google/genai";
-import { Story, Project } from "../types.ts";
+import { GoogleGenAI, SchemaType } from "@google/genai";
+import { Story, Project } from "../types";
 
 /**
  * Expert Documentation Engine Powered by Google Gemini.
  * We initialize the AI client using process.env.API_KEY injected from the environment.
+ * "use server" at the top ensures this runs on the server, accessing the private key safely.
  */
-// Directly using process.env.API_KEY as per the guidelines.
 const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export interface GeneratedStory {
@@ -34,8 +23,9 @@ export interface GeneratedStory {
 export const analyzeFigmaDesign = async (imageBase64: string, title: string): Promise<GeneratedStory> => {
   const ai = getAiClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.0-flash-exp', 
     contents: {
+      role: 'user',
       parts: [
         {
           inlineData: {
@@ -56,12 +46,12 @@ export const analyzeFigmaDesign = async (imageBase64: string, title: string): Pr
     config: {
       responseMimeType: 'application/json',
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          description: { type: Type.STRING },
-          acceptanceCriteria: { type: Type.ARRAY, items: { type: Type.STRING } },
-          happyPath: { type: Type.STRING },
-          sadPath: { type: Type.STRING }
+          description: { type: SchemaType.STRING },
+          acceptanceCriteria: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          happyPath: { type: SchemaType.STRING },
+          sadPath: { type: SchemaType.STRING }
         },
         required: ['description', 'acceptanceCriteria', 'happyPath', 'sadPath']
       }
@@ -89,17 +79,17 @@ export const generateStoryFromFigmaData = async (figmaData: any, userContext: st
   Map buttons to actions and inputs to acceptance criteria. Return JSON.`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-2.0-flash-exp',
     contents: prompt,
     config: {
       responseMimeType: 'application/json',
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          description: { type: Type.STRING },
-          acceptanceCriteria: { type: Type.ARRAY, items: { type: Type.STRING } },
-          happyPath: { type: Type.STRING },
-          sadPath: { type: Type.STRING }
+          description: { type: SchemaType.STRING },
+          acceptanceCriteria: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          happyPath: { type: SchemaType.STRING },
+          sadPath: { type: SchemaType.STRING }
         },
         required: ['description', 'acceptanceCriteria', 'happyPath', 'sadPath']
       }
@@ -118,7 +108,7 @@ export const summarizeProject = async (project: Project): Promise<string> => {
   const prompt = `Write a two-sentence executive summary for the project "${project.title}" based on: ${storyTitles}.`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.0-flash-exp',
     contents: prompt
   });
 
