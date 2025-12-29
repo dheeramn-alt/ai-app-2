@@ -69,7 +69,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-primary-600 text-white rounded-2xl md:rounded-[24px] font-bold shadow-2xl hover:scale-105 transition-all"
+            className="w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-primary-600 text-white rounded-2xl md:rounded-[24px] font-bold shadow-2xl hover:scale-105 transition-all shadow-primary-500/20"
           >
             <Icons.Plus className="w-5 h-5 md:w-6 md:h-6" />
             New Project
@@ -160,11 +160,11 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                         onClick={() => setNewProjectData({...newProjectData, templateId: t.id})}
                         className={`text-left p-4 rounded-2xl border transition-all duration-300 flex items-start gap-3 ${
                           newProjectData.templateId === t.id 
-                            ? 'bg-slate-100 dark:bg-slate-800 border-primary-500 ring-4 ring-primary-500/20' 
+                            ? 'bg-slate-100 dark:bg-[#0f172a] border-primary-500 ring-4 ring-primary-500/10 shadow-lg' 
                             : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-primary-500/30'
                         }`}
                       >
-                        <div className={`p-2 rounded-xl shrink-0 ${newProjectData.templateId === t.id ? 'bg-primary-600 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
+                        <div className={`p-2 rounded-xl shrink-0 ${newProjectData.templateId === t.id ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
                           <Icons.FileText className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
@@ -174,7 +174,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                           <p className="text-[10px] text-slate-400 mt-1 line-clamp-1 leading-tight">{t.description}</p>
                         </div>
                         {newProjectData.templateId === t.id && (
-                          <div className="ml-auto bg-primary-600 rounded-full p-0.5">
+                          <div className="ml-auto bg-primary-600 rounded-full p-0.5 shadow-sm">
                             <Icons.Check className="w-2.5 h-2.5 text-white" />
                           </div>
                         )}

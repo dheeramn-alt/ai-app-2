@@ -63,7 +63,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
           <h2 className="text-xl font-black text-slate-900 dark:text-white">Narrative Presets</h2>
           <p className="text-sm text-slate-500 mt-1">Define documentation structure.</p>
         </div>
-        <button onClick={createNewTemplate} className="flex items-center justify-center gap-2.5 px-6 py-3 bg-primary-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl">
+        <button onClick={createNewTemplate} className="flex items-center justify-center gap-2.5 px-6 py-3 bg-primary-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary-500/10 hover:bg-primary-500 transition-all">
           <Icons.Plus className="w-4 h-4" /> Add Preset
         </button>
       </div>
@@ -74,8 +74,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
             key={template.id} 
             className={`p-6 rounded-[28px] md:rounded-[32px] border transition-all duration-500 relative group flex flex-col ${
               template.id === defaultTemplateId 
-                ? 'bg-slate-100 dark:bg-slate-800 border-primary-500 ring-4 ring-primary-500/20' 
-                : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                ? 'bg-slate-200 dark:bg-[#0f172a] border-primary-500 ring-4 ring-primary-500/10 shadow-xl' 
+                : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800'
             }`}
           >
             <div className="flex justify-between items-start mb-4 md:mb-6">
@@ -88,16 +88,20 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                   <p className="text-[10px] text-slate-400 font-medium truncate">{template.description}</p>
                 </div>
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => setEditingTemplate(template)} className="p-2 text-slate-400 hover:text-primary-500"><Icons.Edit className="w-3.5 h-3.5" /></button>
                 <button onClick={() => deleteTemplate(template.id)} className="p-2 text-slate-400 hover:text-rose-500"><Icons.Trash className="w-3.5 h-3.5" /></button>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
+            <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
               {Object.entries(template.structure).map(([key, value]) => (
                 value && typeof value === 'boolean' && (
-                  <span key={key} className="text-[9px] px-3 py-1.5 bg-slate-200 dark:bg-slate-950 text-slate-600 dark:text-slate-400 rounded-full font-black uppercase tracking-widest truncate">
+                  <span key={key} className={`text-[8px] md:text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-[0.1em] border transition-colors ${
+                    template.id === defaultTemplateId
+                      ? 'bg-slate-300/50 dark:bg-slate-950/50 border-slate-400/20 text-slate-700 dark:text-slate-300'
+                      : 'bg-slate-100 dark:bg-slate-800 border-slate-200/50 dark:border-slate-700/50 text-slate-500 dark:text-slate-400'
+                  }`}>
                     {key.replace('has', '').toUpperCase()}
                   </span>
                 )
@@ -112,8 +116,8 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                 Set Default
               </button>
             ) : (
-              <div className="w-full py-2.5 mt-auto text-center">
-                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary-500">Active Preset</span>
+              <div className="w-full py-2.5 mt-auto text-center border-t border-primary-500/20">
+                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary-500">Active Blueprint</span>
               </div>
             )}
           </div>
@@ -154,11 +158,11 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
             </div>
             <div className="hidden lg:block lg:w-1/2 bg-slate-50 dark:bg-slate-950/50 p-10 overflow-y-auto no-scrollbar">
               <span className="text-[9px] font-black uppercase text-slate-400 block mb-6">Preview</span>
-              <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 border border-slate-100 space-y-8 animate-in slide-in-from-right-4 duration-500">
-                <div className="h-4 bg-slate-100 rounded-lg w-3/4"></div>
+              <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 border border-slate-100 dark:border-slate-800 shadow-xl space-y-8 animate-in slide-in-from-right-4 duration-500">
+                <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-lg w-3/4"></div>
                 <div className="space-y-3">
-                  <div className="h-2.5 bg-slate-100 rounded-full w-full"></div>
-                  <div className="h-2.5 bg-slate-100 rounded-full w-5/6"></div>
+                  <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full w-full"></div>
+                  <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full w-5/6"></div>
                 </div>
               </div>
             </div>

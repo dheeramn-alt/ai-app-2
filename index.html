@@ -64,7 +64,6 @@
             background-color: #020617;
             color: #f8fafc;
         }
-        /* Prevents layout shift on mobile keyboards */
         @media screen and (max-width: 768px) {
             .mobile-height-fix {
                 height: -webkit-fill-available;
@@ -73,12 +72,12 @@
     </style>
     <script>
         // Critical shim for Gemini SDK in browser environments
-        if (typeof window.process === 'undefined') {
-            window.process = { env: {} };
-        }
-        // Ensure API_KEY exists to prevent Gemini SDK from throwing during script load
-        if (!window.process.env.API_KEY) {
-            window.process.env.API_KEY = ''; 
+        // We use a non-destructive assignment to preserve platform-injected keys
+        window.process = window.process || {};
+        window.process.env = window.process.env || {};
+        // If API_KEY is missing entirely, we set a fallback to avoid SDK initialization crashes
+        if (typeof window.process.env.API_KEY === 'undefined') {
+            window.process.env.API_KEY = '';
         }
     </script>
 <script type="importmap">
