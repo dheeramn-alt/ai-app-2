@@ -3,11 +3,11 @@ import { Story, Project } from "../types";
 
 /**
  * Expert Documentation Engine Powered by Google Gemini.
- * * NOTE: In Vite (Client-side), we must use import.meta.env.VITE_API_KEY.
- * WARNING: This exposes your API key to the browser. Ensure your Google Cloud Console
- * restrictions (HTTP Referrer) are set to your domain to prevent misuse.
+ * NOTE: In Vite (Client-side), we must use import.meta.env.VITE_API_KEY.
+ * WARNING: This exposes your API key to the browser.
  */
 const getAiClient = () => {
+  // Ensure you have renamed API_KEY to VITE_API_KEY in Vercel Settings!
   const apiKey = import.meta.env.VITE_API_KEY;
   if (!apiKey) {
     throw new Error("Missing VITE_API_KEY. Please set it in Vercel Environment Variables.");
