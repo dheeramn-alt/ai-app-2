@@ -27,6 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onAddStory,
   onToggleEpic,
   onDeleteEpic,
+  onDeleteStory,
   onRenameEpic,
   onMoveStory,
   isDarkMode,
@@ -57,6 +58,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setEditingEpicId(null);
   };
 
+  const handleDeleteEpic = (e: React.MouseEvent, epicId: string) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this Epic and all its stories?')) {
+      onDeleteEpic(epicId);
+    }
+  };
+
+  const handleDeleteStory = (e: React.MouseEvent, storyId: string) => {
+    e.stopPropagation();
+    if (confirm('Delete this story?')) {
+      onDeleteStory(storyId);
+    }
+  };
+
   // Drag and Drop Handlers
   const handleDragStart = (e: React.DragEvent, storyId: string) => {
     setDraggedStoryId(storyId);
@@ -83,16 +98,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="w-full md:w-80 flex-shrink-0 flex flex-col bg-white dark:bg-[#020617] md:border-r border-slate-200 dark:border-slate-900 h-full overflow-hidden transition-all duration-300">
       {/* Archive Header */}
-      <div className="p-5 md:p-6 flex items-center justify-between">
+      <div className="p-5 md:p-6 flex items-center justify-between border-b border-slate-50 dark:border-slate-900/50 mb-4">
         <div className="flex items-center gap-3 md:gap-4">
-          <Icons.ChevronLeft className="w-4 h-4 text-slate-300 dark:text-slate-800 hidden md:block" />
-          <div className="flex items-center gap-2">
-            <Icons.Figma className="w-5 h-5 md:w-6 md:h-6" />
+          <Link to="/" className="p-2 -ml-2 text-slate-300 hover:text-primary transition-colors rounded-lg">
+            <Icons.ChevronLeft className="w-5 h-5" />
+          </Link>
+          <div className="flex flex-col">
             <h2 className="font-black text-[12px] md:text-[14px] uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Archive Index</h2>
           </div>
         </div>
         <button 
           onClick={onAddEpic}
+          title="New Epic"
           className="p-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-400 hover:text-primary transition-all active:scale-95"
         >
           <Icons.Plus className="w-4 h-4 md:w-5 md:h-5" />
@@ -101,13 +118,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Search Input */}
       <div className="px-5 md:px-6 mb-4">
-        <input 
-          type="text" 
-          placeholder="Search Index" 
-          className="w-full bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-2xl py-2.5 md:py-3 px-4 md:px-5 text-[10px] md:text-[11px] font-bold outline-none text-slate-700 dark:text-slate-300 placeholder:text-slate-300 dark:placeholder:text-slate-800 transition-all uppercase tracking-tight"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="relative group">
+          <Icons.Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300 group-focus-within:text-primary transition-colors" />
+          <input 
+            type="text" 
+            placeholder="Search Index" 
+            className="w-full bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-2xl py-2.5 md:py-3 pl-10 pr-4 text-[10px] md:text-[11px] font-bold outline-none text-slate-700 dark:text-slate-300 placeholder:text-slate-300 dark:placeholder:text-slate-800 transition-all uppercase tracking-tight"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Index Tree */}
@@ -124,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`flex items-center group px-3 py-2 rounded-xl cursor-pointer transition-all ${epic.isOpen ? 'bg-slate-50 dark:bg-slate-900/80 text-slate-900 dark:text-slate-200 shadow-sm' : 'text-slate-400 dark:text-slate-600'}`}
               onClick={() => onToggleEpic(epic.id)}
             >
-              <Icons.ChevronLeft className={`w-3 h-3 transition-transform duration-300 ${epic.isOpen ? '-rotate-90' : ''} mr-2`} />
+              <Icons.ChevronRight className={`w-3.5 h-3.5 transition-transform duration-300 ${epic.isOpen ? 'rotate-90' : ''} mr-2`} />
               
               {editingEpicId === epic.id ? (
                 <input
@@ -143,10 +163,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ) : (
                 <span className="flex-1 text-[10px] md:text-[11px] font-black uppercase tracking-[0.1em] truncate">{epic.title}</span>
               )}
+
+              {/* Epic Controls */}
+              <div className="hidden group-hover:flex items-center gap-1">
+                <button 
+                  onClick={(e) => handleStartRename(e, epic)}
+                  title="Rename"
+                  className="p-1.5 hover:text-primary transition-colors rounded-md"
+                >
+                  <Icons.Edit className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={(e) => handleDeleteEpic(e, epic.id)}
+                  title="Delete"
+                  className="p-1.5 hover:text-rose-500 transition-colors rounded-md"
+                >
+                  <Icons.Trash className="w-3 h-3" />
+                </button>
+              </div>
             </div>
 
             {epic.isOpen && (
-              <div className="ml-5 space-y-1 mt-1 border-l border-slate-100 dark:border-slate-800/50 pl-2">
+              <div className="ml-5 space-y-1 mt-1 border-l border-slate-100 dark:border-slate-800/50 pl-2 animate-in slide-in-from-left-2 duration-200">
                 {epic.stories.map(story => (
                   <div 
                     key={story.id}
@@ -164,6 +202,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     )}
                     <Icons.FileText className={`mr-2.5 w-3.5 h-3.5 md:w-4 md:h-4 ${activeStoryId === story.id ? 'text-primary' : 'text-slate-200 dark:text-slate-800'}`} />
                     <span className="text-[11px] md:text-[12px] truncate font-medium flex-1">{story.title}</span>
+                    
+                    <button 
+                      onClick={(e) => handleDeleteStory(e, story.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-500 transition-all"
+                    >
+                      <Icons.Trash className="w-3 h-3" />
+                    </button>
                   </div>
                 ))}
                 
@@ -178,6 +223,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         ))}
+        {filteredEpics.length === 0 && (
+          <div className="py-20 text-center opacity-30 flex flex-col items-center gap-3">
+            <Icons.Folder className="w-8 h-8 text-slate-300" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Index Empty</span>
+          </div>
+        )}
       </div>
       
       {/* Footer (Desktop Only) */}
