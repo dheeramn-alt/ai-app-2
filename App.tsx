@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, Epic, Story, UserRole, User, Project } from './types.ts';
+import { AppState, Epic, Story, UserRole, User, Project, StoryVersion } from './types.ts';
 import { INITIAL_PROJECTS, INITIAL_TEMPLATES, Icons } from './constants.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
 import { Editor } from './components/Editor.tsx';
@@ -29,6 +29,7 @@ const ProjectWorkspace = ({
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
   const [isTemplateDropdownOpen, setIsTemplateDropdownOpen] = useState(false);
   const [isConnectingMCP, setIsConnectingMCP] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const templateDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,7 +51,27 @@ const ProjectWorkspace = ({
       if (epic.id === updatedStory.epicId) {
         return {
           ...epic,
-          stories: epic.stories.map(s => s.id === updatedStory.id ? updatedStory : s)
+          stories: epic.stories.map(s => {
+            if (s.id === updatedStory.id) {
+              const hasMajorChange = s.description !== updatedStory.description || s.title !== updatedStory.title;
+              const versions = s.versions || [];
+              if (hasMajorChange) {
+                const newVersion: StoryVersion = {
+                  id: `v-${Date.now()}`,
+                  timestamp: Date.now(),
+                  title: s.title,
+                  description: s.description,
+                  acceptanceCriteria: s.acceptanceCriteria,
+                  happyPath: s.happyPath,
+                  sadPath: s.sadPath,
+                  authorName: state.currentUser.name
+                };
+                return { ...updatedStory, versions: [newVersion, ...versions].slice(0, 15) };
+              }
+              return updatedStory;
+            }
+            return s;
+          })
         };
       }
       return epic;
@@ -78,6 +99,7 @@ const ProjectWorkspace = ({
     );
     onUpdateProject({ ...project, epics: updatedEpics, lastModified: Date.now() });
     setActiveStoryId(newStory.id);
+    if (window.innerWidth < 768) setIsMobileSidebarOpen(false);
   };
 
   const handleDeleteStory = (storyId: string) => {
@@ -87,6 +109,26 @@ const ProjectWorkspace = ({
     }));
     onUpdateProject({ ...project, epics: updatedEpics, lastModified: Date.now() });
     if (activeStoryId === storyId) setActiveStoryId(null);
+  };
+
+  const handleMoveStory = (storyId: string, targetEpicId: string) => {
+    let storyToMove: Story | null = null;
+    const epicsWithRemovedStory = project.epics.map(epic => {
+      const storyIdx = epic.stories.findIndex(s => s.id === storyId);
+      if (storyIdx !== -1) {
+        storyToMove = { ...epic.stories[storyIdx], epicId: targetEpicId };
+        return { ...epic, stories: epic.stories.filter(s => s.id !== storyId) };
+      }
+      return epic;
+    });
+    if (!storyToMove) return;
+    const updatedEpics = epicsWithRemovedStory.map(epic => {
+      if (epic.id === targetEpicId) {
+        return { ...epic, stories: [...epic.stories, storyToMove!], isOpen: true };
+      }
+      return epic;
+    });
+    onUpdateProject({ ...project, epics: updatedEpics, lastModified: Date.now() });
   };
 
   const handleConnectMCP = () => {
@@ -117,34 +159,41 @@ const ProjectWorkspace = ({
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden h-full">
-      <header className="h-12 border-b border-slate-900 bg-slate-50 dark:bg-slate-950 px-6 flex items-center justify-between z-40 shrink-0 transition-colors duration-300">
-        <div className="flex items-center gap-5">
+      <header className="h-14 md:h-12 border-b border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-4 md:px-6 flex items-center justify-between z-40 shrink-0 transition-colors duration-300">
+        <div className="flex items-center gap-3 md:gap-5">
+          <button 
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="md:hidden p-2 text-slate-400 hover:text-primary transition-colors"
+          >
+            <Icons.Layout className="w-5 h-5" />
+          </button>
           <div className="flex flex-col">
-            <h1 className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight leading-none">{project.title}</h1>
+            <h1 className="text-[11px] md:text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight leading-none truncate max-w-[120px] md:max-w-none">
+              {project.title}
+            </h1>
             <div className="flex items-center gap-1.5 mt-1">
                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <div className={`w-1 h-1 rounded-full ${state.figmaConfig.connected ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
-                  <span className={`text-[7px] font-black uppercase tracking-widest ${state.figmaConfig.connected ? 'text-primary' : 'text-slate-400 dark:text-slate-600'}`}>
+                  <span className={`text-[6px] font-black uppercase tracking-widest ${state.figmaConfig.connected ? 'text-primary' : 'text-slate-400 dark:text-slate-600'}`}>
                     {state.figmaConfig.connected ? 'Online' : 'Offline'}
                   </span>
                </div>
-               <span className="text-[7px] text-slate-400 dark:text-slate-700 font-bold uppercase tracking-widest transition-colors">Synced: Just now</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="relative" ref={templateDropdownRef}>
             <button 
               onClick={() => setIsTemplateDropdownOpen(!isTemplateDropdownOpen)}
-              className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900/40 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all group"
+              className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900/40 px-2 md:px-3 py-1.5 md:py-1 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all group"
             >
-              <Icons.FileText className="w-3 h-3 text-slate-400 dark:text-slate-600 group-hover:text-primary" />
-              <span className="text-[8px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">{selectedTemplate.name}</span>
-              <Icons.ChevronDown className={`w-2.5 h-2.5 text-slate-400 dark:text-slate-700 transition-transform ${isTemplateDropdownOpen ? 'rotate-180' : ''}`} />
+              <Icons.FileText className="w-3 h-3 md:w-2.5 md:h-2.5 text-slate-400 dark:text-slate-600 group-hover:text-primary" />
+              <span className="hidden xs:inline text-[7px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">{selectedTemplate.name}</span>
+              <Icons.ChevronDown className={`w-3 h-3 md:w-2 md:h-2 text-slate-400 dark:text-slate-700 transition-transform ${isTemplateDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             {isTemplateDropdownOpen && (
-              <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-[#020617] rounded-lg shadow-2xl border border-slate-200 dark:border-slate-800 py-1 z-50 overflow-hidden">
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-[#020617] rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 py-2 z-50 overflow-hidden">
                 {state.templates.map(t => (
                   <button 
                     key={t.id}
@@ -152,9 +201,9 @@ const ProjectWorkspace = ({
                       onUpdateProject({ ...project, defaultTemplateId: t.id, lastModified: Date.now() });
                       setIsTemplateDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 flex items-center gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors ${project.defaultTemplateId === t.id ? 'text-primary' : 'text-slate-500 dark:text-slate-500'}`}
+                    className={`w-full text-left px-4 py-2 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors ${project.defaultTemplateId === t.id ? 'text-primary' : 'text-slate-500 dark:text-slate-500'}`}
                   >
-                    <Icons.FileText className="w-3 h-3" />
+                    <Icons.FileText className="w-3.5 h-3.5" />
                     <span className="text-[9px] font-bold uppercase tracking-tight">{t.name}</span>
                   </button>
                 ))}
@@ -165,38 +214,67 @@ const ProjectWorkspace = ({
           <button 
             onClick={handleConnectMCP}
             disabled={isConnectingMCP}
-            className={`p-1.5 rounded-lg transition-all relative ${state.figmaConfig.connected ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-700 hover:text-primary dark:hover:text-slate-300 border border-slate-200 dark:border-slate-800'}`}
+            className={`p-1.5 md:p-1 rounded-lg transition-all relative ${state.figmaConfig.connected ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-700 hover:text-primary dark:hover:text-slate-300 border border-slate-200 dark:border-slate-800'}`}
           >
-            {isConnectingMCP ? <div className="w-3 h-3 border border-primary/30 border-t-primary rounded-full animate-spin"></div> : <Icons.Tool className="w-3.5 h-3.5" />}
+            {isConnectingMCP ? <div className="w-4 h-4 md:w-3 md:h-3 border border-primary/30 border-t-primary rounded-full animate-spin"></div> : <Icons.Tool className="w-4 h-4 md:w-3 md:h-3" />}
           </button>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar 
-          epics={project.epics}
-          activeStoryId={activeStoryId}
-          onSelectStory={(s) => setActiveStoryId(s.id)}
-          onAddEpic={() => {
-            const newEpic = { id: `e-${Date.now()}`, title: 'New Epic', description: '', stories: [], isOpen: true };
-            onUpdateProject({ ...project, epics: [...project.epics, newEpic] });
-          }}
-          onAddStory={handleAddStory}
-          onDeleteEpic={handleDeleteEpic}
-          onDeleteStory={handleDeleteStory}
-          onToggleEpic={(id) => onUpdateProject({ ...project, epics: project.epics.map(e => e.id === id ? { ...e, isOpen: !e.isOpen } : e) })}
-          onRenameEpic={handleRenameEpic}
-          onMoveStory={() => {}}
-          isDarkMode={state.isDarkMode}
-          onToggleDarkMode={() => onUpdateState({ isDarkMode: !state.isDarkMode })}
-        />
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex">
+          <Sidebar 
+            epics={project.epics}
+            activeStoryId={activeStoryId}
+            onSelectStory={(s) => setActiveStoryId(s.id)}
+            onAddEpic={() => {
+              const newEpic = { id: `e-${Date.now()}`, title: 'New Epic', description: '', stories: [], isOpen: true };
+              onUpdateProject({ ...project, epics: [...project.epics, newEpic] });
+            }}
+            onAddStory={handleAddStory}
+            onDeleteEpic={handleDeleteEpic}
+            onDeleteStory={handleDeleteStory}
+            onToggleEpic={(id) => onUpdateProject({ ...project, epics: project.epics.map(e => e.id === id ? { ...e, isOpen: !e.isOpen } : e) })}
+            onRenameEpic={handleRenameEpic}
+            onMoveStory={handleMoveStory}
+            isDarkMode={state.isDarkMode}
+            onToggleDarkMode={() => onUpdateState({ isDarkMode: !state.isDarkMode })}
+          />
+        </div>
+
+        {/* Mobile Sidebar Overlay */}
+        {isMobileSidebarOpen && (
+          <div className="md:hidden fixed inset-0 z-50 flex">
+            <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)} />
+            <div className="relative w-4/5 max-w-xs h-full animate-in slide-in-from-left duration-300">
+              <Sidebar 
+                epics={project.epics}
+                activeStoryId={activeStoryId}
+                onSelectStory={(s) => { setActiveStoryId(s.id); setIsMobileSidebarOpen(false); }}
+                onAddEpic={() => {
+                  const newEpic = { id: `e-${Date.now()}`, title: 'New Epic', description: '', stories: [], isOpen: true };
+                  onUpdateProject({ ...project, epics: [...project.epics, newEpic] });
+                }}
+                onAddStory={handleAddStory}
+                onDeleteEpic={handleDeleteEpic}
+                onDeleteStory={handleDeleteStory}
+                onToggleEpic={(id) => onUpdateProject({ ...project, epics: project.epics.map(e => e.id === id ? { ...e, isOpen: !e.isOpen } : e) })}
+                onRenameEpic={handleRenameEpic}
+                onMoveStory={handleMoveStory}
+                isDarkMode={state.isDarkMode}
+                onToggleDarkMode={() => onUpdateState({ isDarkMode: !state.isDarkMode })}
+              />
+            </div>
+          </div>
+        )}
 
         {activeStory ? (
           <Editor 
             story={activeStory}
             onUpdate={handleUpdateStory}
             onDelete={handleDeleteStory}
-            onMoveStory={() => {}}
+            onMoveStory={handleMoveStory}
             epics={project.epics}
             templates={state.templates}
             currentUser={state.currentUser}
@@ -204,10 +282,10 @@ const ProjectWorkspace = ({
             figmaConfig={state.figmaConfig}
           />
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 text-center p-12 transition-colors duration-300">
-            <Icons.FileText className="w-12 h-12 opacity-5 mb-4 text-slate-400" />
-            <h2 className="text-base font-black text-slate-300 dark:text-slate-800 uppercase tracking-tighter transition-colors">Documentation Workspace</h2>
-            <p className="max-w-xs text-[10px] font-medium mt-2 opacity-20 uppercase tracking-[0.3em] leading-relaxed text-slate-400 dark:text-slate-400">Select a leaf from the archive index to begin drafting.</p>
+          <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 text-center p-8 transition-colors duration-300">
+            <Icons.FileText className="w-12 h-12 md:w-16 md:h-16 opacity-5 mb-4 text-slate-400" />
+            <h2 className="text-sm md:text-base font-black text-slate-300 dark:text-slate-800 uppercase tracking-tighter">Workspace Index</h2>
+            <p className="max-w-xs text-[10px] font-medium mt-3 opacity-30 uppercase tracking-[0.3em] leading-relaxed text-slate-400">Select a story from the index to begin architecting.</p>
           </div>
         )}
       </div>
@@ -232,7 +310,6 @@ const AppContent = () => {
     };
   });
 
-  // Sync dark mode state with HTML class
   useEffect(() => {
     if (state.isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -255,8 +332,9 @@ const AppContent = () => {
   const handleUpdateState = (updates: Partial<AppState>) => setState(prev => ({ ...prev, ...updates }));
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-      <nav className="w-14 flex-shrink-0 flex flex-col items-center py-6 border-r border-slate-200 dark:border-slate-900 bg-white dark:bg-[#020617] z-50 transition-colors duration-300">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
+      {/* Sidebar Navigation - Desktop */}
+      <nav className="hidden md:flex w-14 flex-shrink-0 flex-col items-center py-6 border-r border-slate-200 dark:border-slate-900 bg-white dark:bg-[#020617] z-50 transition-colors duration-300">
         <Link to="/" className={`p-3 rounded-2xl transition-all mb-4 ${location.pathname === '/' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-300 dark:text-slate-800 hover:text-primary dark:hover:text-slate-400'}`}>
           <Icons.Layout className="w-5 h-5" />
         </Link>
@@ -270,7 +348,8 @@ const AppContent = () => {
         </div>
       </nav>
 
-      <main className="flex-1 flex overflow-hidden">
+      {/* Main Viewport */}
+      <main className="flex-1 flex flex-col overflow-hidden pb-[70px] md:pb-0">
         <Routes>
           <Route path="/" element={
             <ProjectDashboard 
@@ -299,6 +378,24 @@ const AppContent = () => {
           <Route path="/settings" element={<Settings state={state} onUpdateState={handleUpdateState} />} />
         </Routes>
       </main>
+
+      {/* Mobile Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 h-[70px] bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-900 flex items-center justify-around px-6 z-[60] shadow-2xl transition-colors duration-300">
+        <Link to="/" className={`flex flex-col items-center gap-1 transition-all ${location.pathname === '/' ? 'text-primary' : 'text-slate-400'}`}>
+          <Icons.Layout className="w-5 h-5" />
+          <span className="text-[8px] font-black uppercase tracking-widest">Dash</span>
+        </Link>
+        <Link to="/settings" className={`flex flex-col items-center gap-1 transition-all ${location.pathname === '/settings' ? 'text-primary' : 'text-slate-400'}`}>
+          <Icons.Settings className="w-5 h-5" />
+          <span className="text-[8px] font-black uppercase tracking-widest">Space</span>
+        </Link>
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-500 font-black text-[10px] border border-slate-200 dark:border-slate-800">
+            {state.currentUser.name.charAt(0)}
+          </div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Profile</span>
+        </div>
+      </nav>
     </div>
   );
 };
