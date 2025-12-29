@@ -72,17 +72,19 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
         {templates.map(template => (
           <div 
             key={template.id} 
-            className={`p-6 rounded-[28px] md:rounded-[32px] border transition-all duration-300 relative group ${
-              template.id === defaultTemplateId ? 'bg-primary-50/50 border-primary-200' : 'bg-white dark:bg-slate-900 border-slate-100'
+            className={`p-6 rounded-[28px] md:rounded-[32px] border transition-all duration-500 relative group flex flex-col ${
+              template.id === defaultTemplateId 
+                ? 'bg-slate-100 dark:bg-slate-800 border-primary-500 ring-4 ring-primary-500/20' 
+                : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
             }`}
           >
             <div className="flex justify-between items-start mb-4 md:mb-6">
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-2xl ${template.id === defaultTemplateId ? 'bg-primary-600 text-white' : 'bg-slate-50 dark:bg-slate-800'}`}>
+                <div className={`p-3 rounded-2xl ${template.id === defaultTemplateId ? 'bg-primary-600 text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
                   <Icons.FileText className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-bold text-slate-900 dark:text-white text-sm md:text-base truncate">{template.name}</h3>
+                  <h3 className={`font-bold text-sm md:text-base truncate ${template.id === defaultTemplateId ? 'text-slate-900 dark:text-white' : 'text-slate-900 dark:text-white'}`}>{template.name}</h3>
                   <p className="text-[10px] text-slate-400 font-medium truncate">{template.description}</p>
                 </div>
               </div>
@@ -95,15 +97,24 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
             <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
               {Object.entries(template.structure).map(([key, value]) => (
                 value && typeof value === 'boolean' && (
-                  <span key={key} className="text-[8px] px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full font-black uppercase tracking-widest truncate">
-                    {key.replace('has', '')}
+                  <span key={key} className="text-[9px] px-3 py-1.5 bg-slate-200 dark:bg-slate-950 text-slate-600 dark:text-slate-400 rounded-full font-black uppercase tracking-widest truncate">
+                    {key.replace('has', '').toUpperCase()}
                   </span>
                 )
               ))}
             </div>
 
-            {template.id !== defaultTemplateId && (
-              <button onClick={() => onSetDefaultTemplate(template.id)} className="w-full py-2.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary-500 border-t border-slate-50 dark:border-slate-800 transition-all">Set Default</button>
+            {template.id !== defaultTemplateId ? (
+              <button 
+                onClick={() => onSetDefaultTemplate(template.id)} 
+                className="w-full py-2.5 mt-auto text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary-500 border-t border-slate-50 dark:border-slate-800 transition-all"
+              >
+                Set Default
+              </button>
+            ) : (
+              <div className="w-full py-2.5 mt-auto text-center">
+                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary-500">Active Preset</span>
+              </div>
             )}
           </div>
         ))}

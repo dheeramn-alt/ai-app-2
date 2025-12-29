@@ -164,23 +164,23 @@ const ProjectWorkspace = ({
         </div>
 
         <div className="flex items-center gap-2 md:gap-4 shrink-0 ml-2">
-          {/* Custom Template Selector - Hidden on very small screens or made compact */}
+          {/* Custom Template Selector */}
           <div className="relative" ref={templateDropdownRef}>
             <button 
               onClick={() => setIsTemplateDropdownOpen(!isTemplateDropdownOpen)}
-              className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-2 md:px-4 py-1.5 md:py-2 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-primary-500/30 transition-all shadow-sm active:scale-95"
+              className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-2 md:px-4 py-1.5 md:py-2 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-primary-500/30 transition-all shadow-sm active:scale-95 group"
             >
-              <span className="hidden lg:inline text-[10px] font-black uppercase tracking-widest text-slate-400">Template</span>
+              <Icons.FileText className="w-3.5 h-3.5 text-primary-500 hidden sm:block" />
               <div className="flex items-center gap-1.5 md:gap-2">
-                <span className="text-[10px] md:text-xs font-black text-primary-600 truncate max-w-[60px] md:max-w-[120px]">{selectedTemplate.name}</span>
+                <span className="text-[10px] md:text-xs font-black text-primary-600 truncate max-w-[80px] md:max-w-[140px] uppercase tracking-tight">{selectedTemplate.name}</span>
                 <Icons.ChevronDown className={`w-3 h-3 md:w-3.5 md:h-3.5 text-primary-500 transition-transform duration-300 ${isTemplateDropdownOpen ? 'rotate-180' : ''}`} />
               </div>
             </button>
 
             {isTemplateDropdownOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 md:w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2 z-[60] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+              <div className="absolute top-full right-0 mt-2 w-56 md:w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2 z-[60] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
                 <div className="px-4 py-2 border-b border-slate-50 dark:border-slate-800 mb-1">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select Schema</span>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Global Architecture</span>
                 </div>
                 {state.templates.map(t => (
                   <button 
@@ -190,12 +190,18 @@ const ProjectWorkspace = ({
                       setIsTemplateDropdownOpen(false);
                     }}
                     className={`
-                      w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold transition-colors text-left
+                      w-full flex items-start gap-3 px-4 py-3 text-xs font-bold transition-colors text-left
                       ${project.defaultTemplateId === t.id ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}
                     `}
                   >
-                    <span className="truncate">{t.name}</span>
-                    {project.defaultTemplateId === t.id && <Icons.Check className="w-3.5 h-3.5 shrink-0 ml-2" />}
+                    <Icons.FileText className={`w-4 h-4 mt-0.5 shrink-0 ${project.defaultTemplateId === t.id ? 'text-primary-500' : 'text-slate-400'}`} />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate">{t.name}</span>
+                        {project.defaultTemplateId === t.id && <div className="w-1 h-1 rounded-full bg-primary-500"></div>}
+                      </div>
+                      <p className="text-[9px] text-slate-400 font-medium mt-0.5 line-clamp-1">{t.description}</p>
+                    </div>
                   </button>
                 ))}
               </div>

@@ -132,25 +132,61 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[32px] md:rounded-[44px] shadow-3xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
-            <form onSubmit={handleCreateSubmit} className="p-6 md:p-10 space-y-6 md:space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl md:text-3xl font-black dark:text-white">New Project</h3>
-                <button type="button" onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400"><Icons.Plus className="w-6 h-6 md:w-8 md:h-8 rotate-45" /></button>
-              </div>
-              <div className="space-y-4 md:space-y-6">
+          <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[32px] md:rounded-[44px] shadow-3xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+            <div className="p-6 md:p-10 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <h3 className="text-2xl md:text-3xl font-black dark:text-white tracking-tighter">Initialize Project</h3>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all"><Icons.Plus className="w-6 h-6 md:w-8 md:h-8 rotate-45" /></button>
+            </div>
+            
+            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 md:space-y-8 no-scrollbar">
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Title</label>
-                  <input required type="text" value={newProjectData.title} onChange={(e) => setNewProjectData({...newProjectData, title: e.target.value})} className="w-full px-5 py-3 md:py-4 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 outline-none focus:ring-4 focus:ring-primary-500/10 dark:text-white transition-all text-base md:text-lg font-medium" />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Project Name</label>
+                  <input required type="text" value={newProjectData.title} onChange={(e) => setNewProjectData({...newProjectData, title: e.target.value})} className="w-full px-5 py-3 md:py-4 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 outline-none focus:ring-4 focus:ring-primary-500/10 dark:text-white transition-all text-base md:text-lg font-bold" placeholder="Design System Revamp..." />
                 </div>
+                
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Context</label>
-                  <textarea value={newProjectData.description} onChange={(e) => setNewProjectData({...newProjectData, description: e.target.value})} rows={3} className="w-full px-5 py-3 md:py-4 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 outline-none focus:ring-4 focus:ring-primary-500/10 dark:text-white transition-all text-sm md:text-base resize-none" />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Business Context</label>
+                  <textarea value={newProjectData.description} onChange={(e) => setNewProjectData({...newProjectData, description: e.target.value})} rows={2} className="w-full px-5 py-3 md:py-4 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 outline-none focus:ring-4 focus:ring-primary-500/10 dark:text-white transition-all text-sm md:text-base resize-none" placeholder="What are we building and why?" />
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Narrative Blueprint</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {templates.map(t => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setNewProjectData({...newProjectData, templateId: t.id})}
+                        className={`text-left p-4 rounded-2xl border transition-all duration-300 flex items-start gap-3 ${
+                          newProjectData.templateId === t.id 
+                            ? 'bg-slate-100 dark:bg-slate-800 border-primary-500 ring-4 ring-primary-500/20' 
+                            : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-primary-500/30'
+                        }`}
+                      >
+                        <div className={`p-2 rounded-xl shrink-0 ${newProjectData.templateId === t.id ? 'bg-primary-600 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
+                          <Icons.FileText className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className={`text-xs font-black uppercase tracking-tight truncate ${newProjectData.templateId === t.id ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-slate-100'}`}>
+                            {t.name}
+                          </h4>
+                          <p className="text-[10px] text-slate-400 mt-1 line-clamp-1 leading-tight">{t.description}</p>
+                        </div>
+                        {newProjectData.templateId === t.id && (
+                          <div className="ml-auto bg-primary-600 rounded-full p-0.5">
+                            <Icons.Check className="w-2.5 h-2.5 text-white" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="flex gap-4 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 text-xs font-black uppercase text-slate-400 hover:text-slate-600">Cancel</button>
-                <button type="submit" className="flex-1 py-4 bg-primary-600 text-white rounded-xl md:rounded-[24px] text-xs font-black uppercase shadow-2xl transition-all">Create</button>
+
+              <div className="flex gap-4 pt-4 sticky bottom-0 bg-white dark:bg-slate-900 pb-2 mt-auto">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 text-xs font-black uppercase text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
+                <button type="submit" className="flex-1 py-4 bg-primary-600 text-white rounded-xl md:rounded-[24px] text-xs font-black uppercase shadow-2xl shadow-primary-500/30 hover:bg-primary-500 active:scale-95 transition-all">Create Project</button>
               </div>
             </form>
           </div>
