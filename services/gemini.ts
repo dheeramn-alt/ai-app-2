@@ -2,7 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Story, Project } from "../types";
 
-// Always use const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export interface GeneratedStory {
@@ -65,46 +64,40 @@ export const analyzeFigmaDesign = async (imageBase64: string, title: string): Pr
 };
 
 /**
- * Rewrites a section of text in a specific style.
+ * Generates a story from Figma JSON data (simulated Figma API details).
  */
-export const rewriteSection = async (text: string, style: 'technical' | 'concise' | 'descriptive'): Promise<string> => {
-  const prompt = `Rewrite the following user story component to be more ${style}. Keep the same core meaning but change the tone and detail level.\n\nInput text: "${text}"`;
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt
-  });
-
-  return response.text || text;
-};
-
-/**
- * Analyzes multiple stories within an epic to find potential conflicts or gaps.
- * Uses Gemini 3 Pro for complex reasoning.
- */
-export const checkRequirementsConflicts = async (stories: Story[]): Promise<string> => {
-  if (stories.length < 2) return "Not enough stories to analyze for conflicts.";
-
-  const content = stories.map(s => `Story: ${s.title}\nDescription: ${s.description}\nACs: ${s.acceptanceCriteria.join(', ')}`).join('\n\n---\n\n');
+export const generateStoryFromFigmaData = async (figmaData: any, userContext: string): Promise<GeneratedStory> => {
+  const prompt = `You are a Senior Technical Product Manager. 
+  I am providing you with structured data from a Figma Design file and some user context.
+  User Context: "${userContext}"
+  Figma Data: ${JSON.stringify(figmaData)}
   
-  const prompt = `As a Senior Quality Assurance Engineer, analyze the following collection of user stories for a project. 
-  Identify any functional contradictions, overlapping requirements, or logical gaps between them.
-  Be concise and highlight specific stories that conflict. If no major issues are found, simply say "No major conflicts detected."
+  Please map every button to a user action and every input field to an acceptance criterion.
+  Identify states (loading, error, success) implied by the design layers.
   
-  Stories to analyze:
-  ${content}`;
+  Format the output as a valid JSON object.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-preview',
-    contents: prompt
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          description: { type: Type.STRING },
+          acceptanceCriteria: { type: Type.ARRAY, items: { type: Type.STRING } },
+          happyPath: { type: Type.STRING },
+          sadPath: { type: Type.STRING }
+        },
+        required: ['description', 'acceptanceCriteria', 'happyPath', 'sadPath']
+      }
+    }
   });
 
-  return response.text || "Analysis failed.";
+  return JSON.parse(response.text || '{}');
 };
 
-/**
- * Generates a high-level executive summary for a project.
- */
 export const summarizeProject = async (project: Project): Promise<string> => {
   const totalStories = project.epics.reduce((acc, e) => acc + e.stories.length, 0);
   if (totalStories === 0) return "Add some stories to see an AI summary of this project.";

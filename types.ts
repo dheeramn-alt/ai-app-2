@@ -24,6 +24,14 @@ export interface StoryVersion {
   authorName: string;
 }
 
+export type RelationshipType = 'blocks' | 'blocked-by' | 'relates-to';
+
+export interface StoryRelationship {
+  id: string;
+  targetStoryId: string;
+  type: RelationshipType;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -31,7 +39,7 @@ export interface Project {
   epics: Epic[];
   createdAt: number;
   lastModified: number;
-  defaultTemplateId: string; // New field for project-specific templates
+  defaultTemplateId: string;
   thumbnail?: string;
 }
 
@@ -55,6 +63,7 @@ export interface Story {
   figmaUrl?: string;
   figmaScreenshot?: string;
   versions?: StoryVersion[];
+  relationships?: StoryRelationship[];
 }
 
 export interface Template {
@@ -66,7 +75,10 @@ export interface Template {
     hasAcceptanceCriteria: boolean;
     hasHappyPath: boolean;
     hasSadPath: boolean;
-    customFields?: string[];
+    defaultNarrative?: string;
+    defaultAC?: string[];
+    defaultHappyPath?: string;
+    defaultSadPath?: string;
   };
 }
 

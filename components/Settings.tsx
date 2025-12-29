@@ -26,19 +26,19 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
         <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit">
           <button 
             onClick={() => setActiveSubTab('integrations')}
-            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'integrations' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'integrations' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
           >
             Integrations
           </button>
           <button 
             onClick={() => setActiveSubTab('templates')}
-            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'templates' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'templates' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
           >
             Templates
           </button>
           <button 
             onClick={() => setActiveSubTab('team')}
-            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'team' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+            className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === 'team' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
           >
             Team
           </button>
@@ -66,11 +66,11 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
                       value={state.figmaConfig.apiKey}
                       onChange={(e) => onUpdateState({ figmaConfig: { ...state.figmaConfig, apiKey: e.target.value } })}
                       placeholder="figd_..."
-                      className="flex-1 px-6 py-4 rounded-2xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 focus:ring-4 focus:ring-blue-500/10 outline-none dark:text-white transition-all font-mono"
+                      className="flex-1 px-6 py-4 rounded-2xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 focus:ring-4 focus:ring-emerald-500/10 outline-none dark:text-white transition-all font-mono"
                     />
                     <button 
                       onClick={() => onUpdateState({ figmaConfig: { ...state.figmaConfig, connected: true } })}
-                      className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                      className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-xl shadow-emerald-600/20 hover:scale-[1.02] active:scale-95 transition-all"
                     >
                       {state.figmaConfig.connected ? 'Active' : 'Authorize'}
                     </button>
@@ -88,7 +88,7 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
                 </div>
                 <button 
                   onClick={() => onUpdateState({ isDarkMode: !state.isDarkMode })}
-                  className={`w-14 h-8 rounded-full transition-colors relative ${state.isDarkMode ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-800'}`}
+                  className={`w-14 h-8 rounded-full transition-colors relative ${state.isDarkMode ? 'bg-emerald-600' : 'bg-slate-200 dark:bg-slate-800'}`}
                 >
                     <div className={`absolute top-1.5 left-1.5 w-5 h-5 bg-white rounded-full shadow-lg transition-transform ${state.isDarkMode ? 'translate-x-6' : ''}`}></div>
                 </button>
@@ -113,7 +113,7 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
             <section className="bg-white dark:bg-slate-900 rounded-[32px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
               <div className="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">Collaborators</h2>
-                <button className="text-xs text-blue-500 font-black uppercase tracking-widest hover:underline">Invite Member</button>
+                <button className="text-xs text-emerald-500 font-black uppercase tracking-widest hover:underline">Invite Member</button>
               </div>
               <div className="divide-y divide-slate-50 dark:divide-slate-800">
                 {state.users.map(user => (
@@ -130,7 +130,7 @@ export const Settings: React.FC<SettingsProps> = ({ state, onUpdateState }) => {
                     <div className="flex items-center gap-4">
                       <span className={`text-[9px] px-3 py-1.5 rounded-lg font-black uppercase tracking-widest ${
                         user.role === UserRole.ADMIN ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400' : 
-                        user.role === UserRole.EDITOR ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                        user.role === UserRole.EDITOR ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                       }`}>
                         {user.role}
                       </span>

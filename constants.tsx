@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Epic, UserRole, Template, Project } from './types';
 
@@ -12,31 +13,17 @@ export const INITIAL_EPICS: Epic[] = [
         id: 's1',
         epicId: 'e1',
         title: 'Sign Up with Email',
-        description: 'As a new user, I want to create an account using my email address.',
+        description: '### 👤 User Story\n**As a** new user,\n**I want to** create an account using my email,\n**So that** I can access the platform features.\n\n### 💼 Business Value\nIncrease conversion by 10%',
         acceptanceCriteria: [
           'Email must be valid format',
           'Password must be at least 8 characters',
           'Send verification email upon success'
         ],
-        happyPath: 'User enters valid details, clicks sign up, redirects to verification page.',
+        happyPath: '### 🛠 Technical Implementation\n* **API:** POST /api/auth/register\n* **Components:** AuthFormWidget\n\nUser enters valid details, clicks sign up, redirects to verification page.',
         sadPath: 'User enters existing email, error message "Email already in use" is shown.',
         status: 'Ready',
-        versions: []
-      },
-      {
-        id: 's2',
-        epicId: 'e1',
-        title: 'Login with SSO',
-        description: 'As a returning user, I want to log in quickly using Google or Github.',
-        acceptanceCriteria: [
-          'OAuth window opens correctly',
-          'User data is synced on first login',
-          'Redirect to dashboard after auth'
-        ],
-        happyPath: 'User clicks Google button, selects account, lands on dashboard.',
-        sadPath: 'User cancels OAuth flow, remains on login page.',
-        status: 'Draft',
-        versions: []
+        versions: [],
+        relationships: []
       }
     ]
   }
@@ -51,50 +38,62 @@ export const INITIAL_PROJECTS: Project[] = [
     lastModified: Date.now(),
     defaultTemplateId: 't1',
     epics: INITIAL_EPICS
-  },
-  {
-    id: 'p2',
-    title: 'Mobile App 2.0',
-    description: 'Rebuilding the iOS and Android applications with React Native.',
-    createdAt: Date.now() - 86400000 * 2,
-    lastModified: Date.now() - 3600000,
-    defaultTemplateId: 't1',
-    epics: []
   }
 ];
 
 export const INITIAL_TEMPLATES: Template[] = [
   {
     id: 't1',
-    name: 'Agile Standard',
-    description: 'Classic User Story format with AC and Scenarios.',
+    name: '[Epic] Blueprint',
+    description: 'For large projects and multi-sprint initiatives.',
     structure: {
       hasDescription: true,
       hasAcceptanceCriteria: true,
       hasHappyPath: true,
-      hasSadPath: true
+      hasSadPath: true,
+      defaultNarrative: `### 🎯 Objective\n*Briefly describe the big goal. What problem are we solving?*\n\n### 📏 Scope\n**In Scope:**\n* Feature A\n* Feature B\n\n**Out of Scope:**\n* Mobile version (Phase 2)\n* Analytics integration`,
+      defaultAC: ['Feature requirement 1', 'Feature requirement 2'],
+      defaultHappyPath: `### 💼 Business Value\n* Why are we doing this? (e.g., Increase conversion by 10%)`,
+      defaultSadPath: `### 🔗 Key Links\n* [Product Requirements Doc (PRD)]\n* [Figma Prototype]\n* [Slack Channel]`
     }
   },
   {
     id: 't2',
-    name: 'Gherkin Syntax',
-    description: 'Given-When-Then structured acceptance criteria.',
-    structure: {
-      hasDescription: true,
-      hasAcceptanceCriteria: true,
-      hasHappyPath: false,
-      hasSadPath: false
-    }
-  },
-  {
-    id: 't3',
-    name: 'Technical Spec',
-    description: 'Focus on API endpoints and data schemas.',
+    name: '[Feature] User Story',
+    description: 'Classic User Story format with AC and Technical Specs.',
     structure: {
       hasDescription: true,
       hasAcceptanceCriteria: true,
       hasHappyPath: true,
-      hasSadPath: true
+      hasSadPath: true,
+      defaultNarrative: `### 👤 User Story\n**As a** [Role],\n**I want to** [Action],\n**So that** [Benefit].`,
+      defaultAC: [
+        'Condition 1 (e.g., Button is blue)',
+        'Condition 2 (e.g., Error message appears if field is empty)',
+        'Condition 3 (e.g., Data saves to DB)'
+      ],
+      defaultHappyPath: `### 🛠 Technical Implementation\n* **API:** GET /api/users\n* **Components:** Use TableWidget\n* **Risks:** Check for latency on large datasets.`,
+      defaultSadPath: `### 🎨 Design\n* [Link to Screen Design]`
+    }
+  },
+  {
+    id: 't3',
+    name: '[Bug] Report',
+    description: 'When something is broken and needs a fix.',
+    structure: {
+      hasDescription: true,
+      hasAcceptanceCriteria: true,
+      hasHappyPath: true,
+      hasSadPath: true,
+      defaultNarrative: `### 🐞 Issue Description\n*Briefly explain what is happening vs what should happen.*`,
+      defaultAC: [
+        '1. Go to page "..."',
+        '2. Click on "..."',
+        '3. Scroll down to "..."',
+        '4. See error.'
+      ],
+      defaultHappyPath: `### 🟢 Expected Behavior\n*The modal should close automatically.*`,
+      defaultSadPath: `### 🔴 Actual Behavior\n*The modal stays open and freezes the screen.*\n\n### 🌍 Environment\n* **Browser:** Chrome v120\n* **Device:** Desktop`
     }
   }
 ];
@@ -150,5 +149,17 @@ export const Icons = {
   ),
   Clock: ({ className = "" }: { className?: string }) => (
     <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+  ),
+  Link: ({ className = "" }: { className?: string }) => (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+  ),
+  Mic: ({ className = "" }: { className?: string }) => (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+  ),
+  Send: ({ className = "" }: { className?: string }) => (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+  ),
+  Tool: ({ className = "" }: { className?: string }) => (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19 7-7 3 3-7 7-3-3Z"></path><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z"></path><path d="m2 2 5 5"></path><path d="m9.5 9.5 1.5 1.5"></path></svg>
   )
 };
