@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Epic, Story } from '../types.ts';
 import { Icons } from '../constants.tsx';
 import { Link } from 'react-router-dom';
@@ -15,6 +15,8 @@ interface SidebarProps {
   onToggleEpic: (epicId: string) => void;
   onRenameEpic: (epicId: string, newTitle: string) => void;
   onMoveStory: (storyId: string, targetEpicId: string) => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -23,185 +25,115 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectStory,
   onAddEpic,
   onAddStory,
-  onDeleteEpic,
-  onDeleteStory,
   onToggleEpic,
+  onDeleteEpic,
   onRenameEpic,
-  onMoveStory
+  isDarkMode,
+  onToggleDarkMode
 }) => {
   const [search, setSearch] = useState('');
   const [editingEpicId, setEditingEpicId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState('');
-  const [draggedStoryId, setDraggedStoryId] = useState<string | null>(null);
-  const [dropTargetEpicId, setDropTargetEpicId] = useState<string | null>(null);
+  const [tempEpicTitle, setTempEpicTitle] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   const filteredEpics = epics.filter(epic => 
     epic.title.toLowerCase().includes(search.toLowerCase()) ||
     epic.stories.some(s => s.title.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const startRenaming = (e: React.MouseEvent, epic: Epic) => {
+  const handleStartRename = (e: React.MouseEvent, epic: Epic) => {
     e.stopPropagation();
     setEditingEpicId(epic.id);
-    setEditingTitle(epic.title);
+    setTempEpicTitle(epic.title);
   };
 
-  const handleRenameSubmit = (epicId: string) => {
-    if (editingTitle.trim()) {
-      onRenameEpic(epicId, editingTitle.trim());
+  const handleFinishRename = (epicId: string) => {
+    if (tempEpicTitle.trim()) {
+      onRenameEpic(epicId, tempEpicTitle.trim());
     }
     setEditingEpicId(null);
   };
 
-  const handleRenameKeyDown = (e: React.KeyboardEvent, epicId: string) => {
-    if (e.key === 'Enter') handleRenameSubmit(epicId);
-    if (e.key === 'Escape') setEditingEpicId(null);
-  };
-
-  const handleDragStart = (e: React.DragEvent, storyId: string) => {
-    setDraggedStoryId(storyId);
-    e.dataTransfer.setData('storyId', storyId);
-    e.dataTransfer.effectAllowed = 'move';
-    const target = e.target as HTMLElement;
-    target.style.opacity = '0.5';
-  };
-
-  const handleDragEnd = (e: React.DragEvent) => {
-    setDraggedStoryId(null);
-    setDropTargetEpicId(null);
-    const target = e.target as HTMLElement;
-    target.style.opacity = '1';
-  };
-
-  const handleDragOver = (e: React.DragEvent, epicId: string) => {
-    e.preventDefault();
-    if (draggedStoryId) {
-      setDropTargetEpicId(epicId);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    setDropTargetEpicId(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, targetEpicId: string) => {
-    e.preventDefault();
-    const storyId = e.dataTransfer.getData('storyId');
-    if (storyId && targetEpicId) {
-      onMoveStory(storyId, targetEpicId);
-    }
-    setDraggedStoryId(null);
-    setDropTargetEpicId(null);
-  };
-
-  const confirmDeleteEpic = (e: React.MouseEvent, epic: Epic) => {
+  const handleDeleteEpic = (e: React.MouseEvent, epicId: string) => {
     e.stopPropagation();
-    const message = `Are you sure you want to delete the epic "${epic.title}"? This will permanently remove all ${epic.stories.length} stories inside it.`;
-    if (window.confirm(message)) {
-      onDeleteEpic(epic.id);
-    }
-  };
-
-  const confirmDeleteStory = (e: React.MouseEvent, story: Story) => {
-    e.stopPropagation();
-    const message = `Are you sure you want to delete the story "${story.title}"? This action cannot be undone.`;
-    if (window.confirm(message)) {
-      onDeleteStory(story.id);
+    if (confirm("Permanently delete this Epic and all its stories?")) {
+      onDeleteEpic(epicId);
     }
   };
 
   return (
-    <div className="w-72 flex-shrink-0 flex flex-col border-r border-slate-100 bg-white dark:bg-slate-950 dark:border-slate-900 h-full overflow-hidden transition-colors duration-300">
-      <div className="p-4 border-b border-slate-50 dark:border-slate-900 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="p-1 rounded-md hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
-            <Icons.ChevronLeft className="w-4 h-4 text-slate-400 group-hover:text-primary-500" />
+    <div className="w-80 flex-shrink-0 flex flex-col bg-white dark:bg-[#020617] border-r border-slate-200 dark:border-slate-900 h-full overflow-hidden transition-all duration-300 shadow-[10px_0_30px_rgba(0,0,0,0.02)] dark:shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+      {/* Archive Header - Compact & Premium */}
+      <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-900/50">
+        <Link to="/" className="flex items-center gap-3 group">
+          <Icons.ChevronLeft className="w-3.5 h-3.5 text-slate-300 dark:text-slate-800 group-hover:text-primary dark:group-hover:text-white transition-colors" />
+          <div className="flex items-center gap-2">
+            <Icons.Figma className="w-5 h-5" />
+            <h2 className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-800 dark:text-slate-200 transition-colors">Archive Index</h2>
           </div>
-          <h2 className="font-black text-sm tracking-tight flex items-center gap-2 dark:text-white">
-            <Icons.Figma />
-            <span>Archive Index</span>
-          </h2>
         </Link>
         <button 
           onClick={onAddEpic}
-          className="p-1.5 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg text-slate-400 hover:text-primary-500 transition-all"
-          title="New Epic Container"
+          className="p-1.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 dark:text-slate-700 hover:text-primary dark:hover:text-white transition-all active:scale-90 hover:border-primary/30 dark:hover:border-slate-600 shadow-sm"
         >
-          <Icons.Plus />
+          <Icons.Plus className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="px-4 py-4">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
-            <Icons.Search className="w-4 h-4" />
-          </div>
+      {/* Compact Search */}
+      <div className="p-4 px-5">
+        <div className="relative group">
+          <Icons.Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300 dark:text-slate-800 group-focus-within:text-primary transition-colors" />
           <input 
             type="text" 
-            placeholder="Search epics..." 
-            className="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-xl py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-primary-500/20 outline-none dark:text-slate-300 transition-all"
+            placeholder="Search documentation..." 
+            className="w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/50 rounded-xl py-2.5 pl-10 pr-4 text-[10px] font-bold focus:ring-4 focus:ring-primary/10 outline-none text-slate-700 dark:text-slate-300 placeholder:text-slate-300 dark:placeholder:text-slate-800 transition-all uppercase tracking-tight"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1 no-scrollbar">
+      {/* Index Tree */}
+      <div className="flex-1 overflow-y-auto px-4 pb-10 space-y-1 no-scrollbar">
         {filteredEpics.map(epic => (
-          <div 
-            key={epic.id} 
-            className={`space-y-0.5 rounded-xl transition-all duration-300 ${
-              dropTargetEpicId === epic.id 
-                ? 'bg-primary-50/50 dark:bg-primary-900/10 ring-2 ring-primary-500/30' 
-                : ''
-            }`}
-            onDragOver={(e) => handleDragOver(e, epic.id)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, epic.id)}
-          >
+          <div key={epic.id} className="space-y-1">
             <div 
-              className="flex items-center group px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors"
+              className={`flex items-center group px-3 py-2.5 rounded-xl cursor-pointer transition-all ${epic.isOpen ? 'bg-slate-50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-200 shadow-sm' : 'text-slate-400 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900/20'}`}
               onClick={() => onToggleEpic(epic.id)}
             >
-              <Icons.ChevronRight className={`w-3 h-3 transition-transform duration-200 text-slate-300 ${epic.isOpen ? 'rotate-90' : ''}`} />
-              <Icons.Folder className={`mx-2.5 w-4 h-4 ${epic.stories.length > 0 ? 'text-primary-500' : 'text-slate-300'}`} />
+              <Icons.ChevronRight className={`w-3 h-3 transition-transform duration-300 ${epic.isOpen ? 'rotate-90 text-primary' : 'text-slate-200 dark:text-slate-800'}`} />
               
               {editingEpicId === epic.id ? (
                 <input
+                  ref={editInputRef}
                   autoFocus
-                  className="flex-1 text-xs font-bold bg-white dark:bg-slate-800 border border-primary-500 rounded px-1.5 py-0.5 outline-none dark:text-white"
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                  onBlur={() => handleRenameSubmit(epic.id)}
-                  onKeyDown={(e) => handleRenameKeyDown(e, epic.id)}
+                  className="flex-1 ml-3 bg-white dark:bg-slate-950 border border-primary/50 rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-[0.05em] text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-primary/10 transition-colors"
+                  value={tempEpicTitle}
+                  onChange={(e) => setTempEpicTitle(e.target.value)}
+                  onBlur={() => handleFinishRename(epic.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleFinishRename(epic.id);
+                    if (e.key === 'Escape') setEditingEpicId(null);
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <span className="flex-1 text-xs font-bold truncate dark:text-slate-300">{epic.title}</span>
+                <span className="flex-1 ml-3 text-[10px] font-black uppercase tracking-[0.05em] truncate">{epic.title}</span>
               )}
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all ml-2">
                 <button 
-                  onClick={(e) => startRenaming(e, epic)}
-                  className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-400 shadow-sm transition-all"
+                  onClick={(e) => handleStartRename(e, epic)}
                   title="Rename Epic"
+                  className="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-400 dark:text-slate-700 hover:text-primary dark:hover:text-slate-200 transition-all shadow-sm"
                 >
                   <Icons.Edit className="w-3 h-3" />
                 </button>
                 <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddStory(epic.id);
-                  }}
-                  className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-400 shadow-sm transition-all"
-                  title="Add Story"
-                >
-                  <Icons.Plus className="w-3 h-3" />
-                </button>
-                <button 
-                  onClick={(e) => confirmDeleteEpic(e, epic)}
-                  className="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md text-slate-300 hover:text-rose-500 shadow-sm transition-all"
+                  onClick={(e) => handleDeleteEpic(e, epic.id)}
                   title="Delete Epic"
+                  className="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-400 dark:text-slate-700 hover:text-rose-500 transition-all shadow-sm"
                 >
                   <Icons.Trash className="w-3 h-3" />
                 </button>
@@ -209,35 +141,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {epic.isOpen && (
-              <div className="ml-6 border-l border-slate-100 dark:border-slate-900 pl-2 space-y-0.5 mt-1 animate-in slide-in-from-left-2 duration-300">
+              <div className="ml-5 border-l-2 border-slate-100 dark:border-slate-900 pl-3 space-y-1.5 mt-1.5 transition-colors">
                 {epic.stories.map(story => (
                   <div 
                     key={story.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, story.id)}
-                    onDragEnd={handleDragEnd}
-                    className={`flex items-center group px-4 py-2 rounded-xl cursor-grab active:cursor-grabbing text-[11px] transition-all ${
-                      activeStoryId === story.id 
-                        ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 font-black shadow-sm' 
-                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100'
-                    } ${draggedStoryId === story.id ? 'opacity-40 grayscale' : ''}`}
+                    className={`flex items-center group px-4 py-2.5 rounded-xl cursor-pointer transition-all relative
+                      ${activeStoryId === story.id 
+                        ? 'bg-primary/5 dark:bg-primary/10 border-2 border-primary/40 text-primary font-black shadow-[0_0_30px_rgba(75,145,49,0.08)] dark:shadow-[0_0_30px_rgba(75,145,49,0.15)] ring-1 ring-primary/20 scale-[1.02]' 
+                        : 'text-slate-400 dark:text-slate-600 hover:text-primary dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 border-2 border-transparent'
+                      }`}
                     onClick={() => onSelectStory(story)}
                   >
-                    <div className="flex items-center gap-2.5 flex-1 truncate">
-                      <Icons.FileText className={`mr-1 w-3.5 h-3.5 flex-shrink-0 ${activeStoryId === story.id ? 'text-primary-500' : 'text-slate-300'}`} />
-                      <span className="truncate">{story.title}</span>
-                    </div>
-                    <button 
-                      onClick={(e) => confirmDeleteStory(e, story)}
-                      className="p-1 hover:bg-white dark:hover:bg-slate-800 rounded-md text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all shadow-sm"
-                      title="Delete Story"
-                    >
-                      <Icons.Trash className="w-3 h-3" />
-                    </button>
+                    <Icons.FileText className={`mr-3 w-3.5 h-3.5 ${activeStoryId === story.id ? 'text-primary' : 'text-slate-200 dark:text-slate-800 group-hover:text-primary/50 dark:group-hover:text-slate-600'}`} />
+                    <span className="text-[11px] truncate tracking-tight flex-1">{story.title}</span>
+                    
+                    {activeStoryId === story.id && (
+                      <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary rounded-full shadow-[0_0_10px_#4B9131]"></div>
+                    )}
                   </div>
                 ))}
+                
+                <button 
+                  onClick={() => onAddStory(epic.id)}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-[9px] font-bold text-slate-300 dark:text-slate-800 hover:text-primary transition-all border border-dashed border-transparent hover:border-primary/20 rounded-xl"
+                >
+                  <Icons.Plus className="w-3 h-3" />
+                  <span className="uppercase tracking-widest">Add Story</span>
+                </button>
+                
                 {epic.stories.length === 0 && (
-                  <div className="text-[10px] text-slate-300 italic py-2.5 px-4">No stories added</div>
+                   <div className="text-[9px] text-slate-200 dark:text-slate-800 font-bold uppercase tracking-[0.2em] py-3 px-4 italic opacity-50">Empty Archive</div>
                 )}
               </div>
             )}
@@ -245,11 +178,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
       
-      <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-900 flex items-center justify-center gap-2.5">
-         <div className="w-4 h-4 rounded-full border border-dashed border-slate-400 flex items-center justify-center">
-            <Icons.Plus className="w-2.5 h-2.5 text-slate-400" />
+      {/* Footer with Theme Toggle */}
+      <div className="p-4 bg-white dark:bg-[#020617]/80 backdrop-blur-md border-t border-slate-100 dark:border-slate-900/60 flex items-center justify-between gap-3 shrink-0 transition-colors duration-300">
+         <div className="flex items-center gap-2.5">
+           <Icons.Undo className="w-3.5 h-3.5 text-slate-300 dark:text-slate-800" />
+           <span className="text-[8px] font-black text-slate-400 dark:text-slate-800 uppercase tracking-[0.5em] hover:text-primary dark:hover:text-slate-600 cursor-pointer transition-colors">Context</span>
          </div>
-         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Organize by Dragging</span>
+         
+         {/* Theme Toggle Button */}
+         <button 
+            onClick={onToggleDarkMode}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-700 hover:text-primary dark:hover:text-primary transition-all active:scale-90"
+         >
+           {isDarkMode ? (
+             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+           ) : (
+             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+           )}
+         </button>
       </div>
     </div>
   );

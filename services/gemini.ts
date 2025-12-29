@@ -6,7 +6,8 @@ import { Story, Project } from "../types.ts";
  * Expert Documentation Engine Powered by Google Gemini.
  * We initialize the AI client using process.env.API_KEY injected from the environment.
  */
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Directly using process.env.API_KEY as per the guidelines.
+const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export interface GeneratedStory {
   description: string;

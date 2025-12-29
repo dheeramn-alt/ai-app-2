@@ -9,7 +9,7 @@ interface ProjectDashboardProps {
   projects: Project[];
   templates: Template[];
   defaultTemplateId: string;
-  onAddProject: (data: { title: string; description: string; templateId: string }) => void;
+  onAddProject: (data: { title: string; description: string; defaultTemplateId: string }) => void;
   onDeleteProject: (id: string) => void;
 }
 
@@ -29,7 +29,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   const [newProjectData, setNewProjectData] = useState({
     title: '',
     description: '',
-    templateId: defaultTemplateId
+    defaultTemplateId: defaultTemplateId
   });
 
   const filteredProjects = projects.filter(p => 
@@ -56,7 +56,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
     if (!newProjectData.title.trim()) return;
     onAddProject(newProjectData);
     setIsModalOpen(false);
-    setNewProjectData({ title: '', description: '', templateId: defaultTemplateId });
+    setNewProjectData({ title: '', description: '', defaultTemplateId: defaultTemplateId });
   };
 
   return (
@@ -157,23 +157,23 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                       <button
                         key={t.id}
                         type="button"
-                        onClick={() => setNewProjectData({...newProjectData, templateId: t.id})}
+                        onClick={() => setNewProjectData({...newProjectData, defaultTemplateId: t.id})}
                         className={`text-left p-4 rounded-2xl border transition-all duration-300 flex items-start gap-3 ${
-                          newProjectData.templateId === t.id 
+                          newProjectData.defaultTemplateId === t.id 
                             ? 'bg-slate-100 dark:bg-[#0f172a] border-primary-500 ring-4 ring-primary-500/10 shadow-lg' 
                             : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-primary-500/30'
                         }`}
                       >
-                        <div className={`p-2 rounded-xl shrink-0 ${newProjectData.templateId === t.id ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
+                        <div className={`p-2 rounded-xl shrink-0 ${newProjectData.defaultTemplateId === t.id ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
                           <Icons.FileText className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
-                          <h4 className={`text-xs font-black uppercase tracking-tight truncate ${newProjectData.templateId === t.id ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-slate-100'}`}>
+                          <h4 className={`text-xs font-black uppercase tracking-tight truncate ${newProjectData.defaultTemplateId === t.id ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-slate-100'}`}>
                             {t.name}
                           </h4>
                           <p className="text-[10px] text-slate-400 mt-1 line-clamp-1 leading-tight">{t.description}</p>
                         </div>
-                        {newProjectData.templateId === t.id && (
+                        {newProjectData.defaultTemplateId === t.id && (
                           <div className="ml-auto bg-primary-600 rounded-full p-0.5 shadow-sm">
                             <Icons.Check className="w-2.5 h-2.5 text-white" />
                           </div>
