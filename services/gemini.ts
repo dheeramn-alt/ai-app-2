@@ -1,4 +1,16 @@
+// Add this line at the very top
+"use server"; 
 
+import { GoogleGenAI, Type } from "@google/genai";
+import { Story, Project } from "../types.ts";
+
+/**
+ * Now this runs on the server, so process.env.API_KEY will be defined
+ * and your key remains private.
+ */
+const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// ... rest of your code
 import { GoogleGenAI, Type } from "@google/genai";
 import { Story, Project } from "../types.ts";
 
